@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bye-Study | CN Kodithuwakku</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        
+        :root {
+            --primary: #1d4ed8;
+            --bg: #f8fafc;
+            --clr-dash: #ef4444; 
+            --clr-anal: #f97316; 
+            --clr-note: #eab308; 
+            --clr-plan: #8b5cf6;
+            --clr-prof: #3b82f6; 
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg);
+            color: #0f172a;
+            font-weight: 600;
+        }
+
+        .sidebar-active { background-color: var(--primary); color: white !important; }
+        #nav-dashboard.sidebar-active { background-color: var(--clr-dash); }
+        #nav-analytics.sidebar-active { background-color: var(--clr-anal); }
+        #nav-notes.sidebar-active { background-color: var(--clr-note); }
+        #nav-planner.sidebar-active { background-color: var(--clr-plan); }
+        #nav-settings.sidebar-active { background-color: var(--clr-prof); }
+
+        .rainbow-text {
+            background: linear-gradient(to right, #ef4444, #f97316, #eab308, #22c55e, #3b82f6, #a855f7, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% auto;
+            animation: rainbow_anim 3s linear infinite;
+            font-weight: 900;
+        }
+        @keyframes rainbow_anim { to { background-position: 200% center; } }
+
+        #notification-toast {
+            position: fixed; top: 1rem; right: 1rem; left: 1rem; z-index: 9999;
+            transform: translateY(-150%); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #notification-toast.show { transform: translateY(0); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+
+        .input-red { background-color: #fef2f2; border-color: #fee2e2; }
+        .input-brown { background-color: #fdf8f6; border-color: #f5ebe0; }
+        .input-green { background-color: #f0fdf4; border-color: #dcfce7; }
+        .input-rose { background-color: #fff1f2; border-color: #ffe4e6; }
+        .input-yellow { background-color: #fefce8; border-color: #fef9c3; }
+
+        .profile-upload-area {
+            width: 100px; height: 100px; border-radius: 30px; 
+            border: 2px dashed #cbd5e1; display: flex; align-items: center; 
+            justify-content: center; cursor: pointer; overflow: hidden; position: relative;
+            transition: all 0.3s ease;
+        }
+        .profile-upload-area:hover { border-color: #3b82f6; background: #eff6ff; }
+        .profile-upload-area img { width: 100%; height: 100%; object-fit: cover; }
+
+        .badge-excellent { background: #dcfce7; color: #166534; }
+        .badge-average { background: #fef9c3; color: #854d0e; }
+        .badge-needs-work { background: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body class="h-screen flex flex-col md:flex-row overflow-hidden">
+
+    <!-- Notifications -->
+    <div id="notification-toast" class="bg-white border-2 border-slate-200 p-4 rounded-2xl shadow-2xl flex items-center space-x-4">
+        <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shrink-0">
+            <i class="fas fa-shield-alt"></i>
+        </div>
+        <p id="notif-message" class="text-xs font-black text-slate-800 leading-tight">Secure Access Granted</p>
+    </div>
+
+    <!-- Auth Overlay -->
+    <div id="auth-overlay" class="fixed inset-0 z-[1000] bg-slate-50 flex items-center justify-center p-6 overflow-y-auto">
+        <div class="w-full max-w-md bg-white p-8 md:p-10 rounded-[2.5rem] shadow-2xl border border-slate-100 my-auto">
+            <div class="flex justify-center mb-6">
+                <div class="w-14 h-14 bg-slate-900 rounded-2xl shadow-xl flex items-center justify-center text-white text-2xl font-black">B</div>
+            </div>
+            
+            <div id="loading-spinner" class="text-center py-6">
+                <div class="inline-block w-8 h-8 border-4 border-slate-900 border-t-transparent rounded-full animate-spin"></div>
+                <p class="mt-4 text-[10px] font-bold uppercase text-slate-400 tracking-widest text-center">Encrypting Session...</p>
+            </div>
+
+            <!-- Registration -->
+            <div id="setup-form" class="hidden space-y-4">
+                <div class="text-center mb-4">
+                    <h1 class="text-2xl font-black text-slate-800">Secure Setup</h1>
+                    <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Protected Environment</p>
+                </div>
+
+                <div class="flex justify-center mb-4">
+                    <div class="profile-upload-area" onclick="document.getElementById('setup-avatar-input').click()">
+                        <img id="setup-avatar-preview" src="" class="hidden">
+                        <div id="upload-icon" class="text-slate-400 text-center">
+                            <i class="fas fa-user-shield text-xl mb-1"></i>
+                            <p class="text-[8px] font-black uppercase">Identify</p>
+                        </div>
+                    </div>
+                    <input type="file" id="setup-avatar-input" class="hidden" accept="image/*">
+                </div>
+                
+                <input type="text" id="reg-name" placeholder="Full Name" class="w-full p-4 input-red border rounded-xl font-bold outline-none text-sm placeholder-red-300">
+                
+                <div class="grid grid-cols-1 gap-3">
+                    <select id="reg-district" class="w-full p-4 input-brown border rounded-xl font-bold outline-none text-sm text-amber-900">
+                        <option value="">Select Your District</option>
+                        <option>Colombo</option><option>Gampaha</option><option>Kalutara</option><option>Kandy</option>
+                        <option>Matale</option><option>Nuwara Eliya</option><option>Galle</option><option>Matara</option>
+                        <option>Hambantota</option><option>Jaffna</option><option>Mannar</option><option>Vavuniya</option>
+                        <option>Mullaitivu</option><option>Kilinochchi</option><option>Batticaloa</option><option>Ampara</option>
+                        <option>Trincomalee</option><option>Kurunegala</option><option>Puttalam</option><option>Anuradhapura</option>
+                        <option>Polonnaruwa</option><option>Badulla</option><option>Monaragala</option><option>Ratnapura</option>
+                        <option>Kegalle</option>
+                    </select>
+                    
+                    <input type="text" id="reg-school" placeholder="School Name" class="w-full p-4 input-green border rounded-xl font-bold outline-none text-sm placeholder-green-300">
+                    <input type="tel" id="reg-phone" placeholder="Phone Number" class="w-full p-4 input-rose border rounded-xl font-bold outline-none text-sm placeholder-rose-300">
+                </div>
+
+                <input type="password" id="reg-pass" placeholder="Create Secure PIN" class="w-full p-4 input-yellow border rounded-xl font-bold outline-none text-sm placeholder-yellow-500">
+                
+                <button id="btn-register" class="w-full bg-slate-900 text-white py-4 rounded-xl font-black uppercase text-xs tracking-widest shadow-lg active:scale-95">Verify & Create</button>
+            </div>
+
+            <!-- PIN Login -->
+            <div id="login-form" class="hidden space-y-4">
+                <div class="text-center">
+                    <h1 class="text-2xl font-black text-slate-800">Secure Vault</h1>
+                    <p id="login-phone-display" class="text-[10px] font-bold text-blue-600 uppercase tracking-widest"></p>
+                </div>
+                <input type="password" id="login-pass" placeholder="••••" class="w-full p-4 input-yellow border rounded-xl font-black text-center text-xl tracking-[0.5em] outline-none">
+                <button id="btn-login" class="w-full bg-slate-900 text-white py-4 rounded-xl font-black uppercase text-xs tracking-widest shadow-lg active:scale-95">Unlock Data</button>
+            </div>
+
+            <p class="text-[9px] text-center text-slate-400 mt-8 font-bold">Encrypted Connection | CN Kodithuwakku</p>
+        </div>
+    </div>
+
+    <!-- Desktop Sidebar -->
+    <aside id="sidebar" class="hidden md:flex w-64 bg-white border-r border-slate-200 flex-col shrink-0">
+        <div class="p-8 text-center">
+            <span class="text-xl font-black rainbow-text">Bye-Study</span>
+        </div>
+        <nav class="flex-1 px-4 space-y-2">
+            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center space-x-3 px-6 py-4 rounded-xl font-bold text-xs uppercase tracking-wider transition-all text-slate-500">
+                <i class="fas fa-th-large"></i><span>Dashboard</span>
+            </button>
+            <button onclick="switchTab('analytics')" id="nav-analytics" class="w-full flex items-center space-x-3 px-6 py-4 rounded-xl font-bold text-xs uppercase tracking-wider transition-all text-slate-500">
+                <i class="fas fa-chart-line"></i><span>Analytics</span>
+            </button>
+            <button onclick="switchTab('planner')" id="nav-planner" class="w-full flex items-center space-x-3 px-6 py-4 rounded-xl font-bold text-xs uppercase tracking-wider transition-all text-slate-500">
+                <i class="fas fa-calendar-alt"></i><span>Planner</span>
+            </button>
+            <button onclick="switchTab('notes')" id="nav-notes" class="w-full flex items-center space-x-3 px-6 py-4 rounded-xl font-bold text-xs uppercase tracking-wider transition-all text-slate-500">
+                <i class="fas fa-sticky-note"></i><span>Notes</span>
+            </button>
+            <button onclick="switchTab('settings')" id="nav-settings" class="w-full flex items-center space-x-3 px-6 py-4 rounded-xl font-bold text-xs uppercase tracking-wider transition-all text-slate-500">
+                <i class="fas fa-user-circle"></i><span>Profile</span>
+            </button>
+        </nav>
+        <div class="p-6 border-t border-slate-100">
+            <p class="text-[8px] font-black text-slate-300 uppercase tracking-widest mb-4">CN Kodithuwakku Edition</p>
+            <div class="flex items-center space-x-3">
+                <div id="side-avatar-container" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-xs overflow-hidden border">👤</div>
+                <div class="min-w-0">
+                    <p id="side-username" class="text-[10px] font-black text-slate-800 truncate">Student</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main id="app-container" class="flex-1 flex flex-col relative overflow-hidden hidden">
+        <header class="h-16 md:h-20 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0">
+            <h2 id="view-title" class="text-sm md:text-lg font-black uppercase tracking-tight text-slate-900 flex-1">Dashboard</h2>
+            <div id="top-avatar-container" class="w-9 h-9 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center font-bold text-sm border border-blue-100 shadow-sm cursor-pointer overflow-hidden" onclick="switchTab('settings')">👤</div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 no-scrollbar pb-24 md:pb-8" id="view-container">
+            <!-- View: Dashboard -->
+            <div id="view-dashboard" class="space-y-6">
+                <div class="bg-gradient-to-br from-slate-900 to-blue-950 p-6 md:p-10 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
+                    <div class="relative z-10 max-w-2xl">
+                        <h3 class="text-xl md:text-2xl font-black mb-4">අධ්‍යාපනයේ වටිනාකම</h3>
+                        <p class="text-xs md:text-sm font-medium leading-relaxed opacity-90 text-justify">
+                            අධ්‍යාපනය යනු හුදෙක් දැනුම ලබා ගැනීම පමණක් නොව, පුද්ගලයෙකුගේ චින්තනය සහ පෞරුෂය හැඩගස්වන ප්‍රබලතම මෙවලමයි. එය ලෝකය දෙස විචාරශීලීව බැලීමටත්, අභියෝග හමුවේ නොසැලී සිටීමටත් අවශ්‍ය ශක්තිය ලබා දෙයි. නිවැරදි අධ්‍යාපනයක් තුළින් ලබන විනය සහ අවබෝධය, පුද්ගල සාර්ථකත්වයට මෙන්ම රටක සංවර්ධනයට ද මුල්ගලක් වේ. දැනුම යනු කිසිවෙකුට සොරාගත නොහැකි, ජීවිත කාලය පුරා ඔබ සතු වන වටිනාම සම්පතයි.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <p class="text-[9px] font-black uppercase tracking-widest text-slate-400">Security Check: All Systems Active</p>
+                    <div id="subject-performance-row" class="flex space-x-4 overflow-x-auto no-scrollbar pb-2"></div>
+                </div>
+
+                <div class="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm space-y-4">
+                    <h3 class="text-[10px] font-black uppercase text-red-500 tracking-widest">New Entry</h3>
+                    <div class="flex flex-col md:flex-row gap-3">
+                        <input type="text" id="input-subject" placeholder="Subject" class="flex-1 p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold text-sm uppercase">
+                        <input type="number" id="input-score" placeholder="Score %" class="w-full md:w-32 p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold text-sm">
+                        <button id="btn-save-mark" class="bg-slate-900 text-white px-8 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest">Store Mark</button>
+                    </div>
+                </div>
+
+                <div id="marks-grid" class="grid grid-cols-2 lg:grid-cols-4 gap-4"></div>
+            </div>
+
+            <!-- View: Analytics -->
+            <div id="view-analytics" class="hidden space-y-8">
+                <!-- Row 1: Overall and Bar Chart -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm flex flex-col items-center justify-center text-center">
+                        <p class="text-[10px] font-black uppercase text-orange-500 tracking-widest mb-6">Overall Average</p>
+                        <div class="relative inline-flex items-center justify-center">
+                            <svg class="w-40 h-40">
+                                <circle class="text-slate-100" stroke-width="10" stroke="currentColor" fill="transparent" r="70" cx="80" cy="80" />
+                                <circle id="anal-overall-circle" class="text-orange-500 transition-all duration-1000" stroke-width="10" stroke-dasharray="439.8" stroke-dashoffset="439.8" stroke-linecap="round" stroke="currentColor" fill="transparent" r="70" cx="80" cy="80" style="transform: rotate(-90deg); transform-origin: 50% 50%;" />
+                            </svg>
+                            <span id="anal-overall-percent" class="absolute text-3xl font-black text-slate-800">0%</span>
+                        </div>
+                    </div>
+                    <div class="md:col-span-2 bg-white p-6 rounded-[2.5rem] border border-slate-200 shadow-sm h-[350px]">
+                        <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-4">All Subject Performance (0-100%)</p>
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Row 2: Subject-Specific Progress -->
+                <div class="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-6">
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                        <div>
+                            <h3 class="text-lg font-black text-slate-800">Subject-Specific Analysis</h3>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Select a subject to track improvement</p>
+                        </div>
+                        <select id="anal-subject-select" class="p-3 bg-slate-50 border border-slate-200 rounded-xl font-black text-[10px] uppercase outline-none min-w-[200px]">
+                            <option value="">Choose Subject</option>
+                        </select>
+                    </div>
+
+                    <div id="subject-detail-container" class="hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <!-- Line Chart for Subject -->
+                            <div class="md:col-span-2 h-[300px]">
+                                <canvas id="subjectLineChart"></canvas>
+                            </div>
+                            <!-- Subject Profile -->
+                            <div class="flex flex-col items-center justify-center p-6 bg-slate-50 rounded-[2rem] text-center">
+                                <p class="text-[9px] font-black uppercase text-slate-400 mb-2">Subject Status</p>
+                                <div id="subject-badge" class="px-6 py-3 rounded-2xl font-black text-xs uppercase mb-4 tracking-widest">
+                                    Analyze Data
+                                </div>
+                                <div class="space-y-1">
+                                    <p class="text-[10px] font-black text-slate-500 uppercase">Latest Entry</p>
+                                    <h4 id="subject-latest-score" class="text-3xl font-black text-slate-800">0%</h4>
+                                </div>
+                                <div class="mt-4 pt-4 border-t border-slate-200 w-full space-y-2">
+                                    <p id="subject-summary-text" class="text-[9px] font-bold text-slate-600 italic">Select subject to view results</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="subject-empty-state" class="text-center py-20 text-slate-300">
+                        <i class="fas fa-chart-area text-4xl mb-4"></i>
+                        <p class="text-xs font-black uppercase tracking-widest">Select a subject above to view progression</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View: Planner -->
+            <div id="view-planner" class="hidden space-y-6">
+                <div class="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm space-y-4">
+                    <h3 class="text-[10px] font-black uppercase text-purple-600 tracking-widest">Plan Study</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <input type="text" id="plan-task" placeholder="Task Name" class="p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold text-sm">
+                        <input type="time" id="plan-start" class="p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold text-sm">
+                        <input type="time" id="plan-end" class="p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold text-sm">
+                        <button id="btn-save-plan" class="bg-purple-600 text-white px-8 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest">Lock Task</button>
+                    </div>
+                </div>
+                <div id="plans-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </div>
+
+            <!-- View: Notes -->
+            <div id="view-notes" class="hidden space-y-6">
+                <button onclick="addNote()" class="w-full py-4 bg-yellow-500 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-md">+ Protected Note</button>
+                <div id="notes-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+            </div>
+
+            <!-- View: Settings/Profile -->
+            <div id="view-settings" class="hidden max-w-md mx-auto space-y-6 pb-12">
+                <div class="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm text-center">
+                    <div class="relative w-24 h-24 mx-auto mb-4 cursor-pointer group" onclick="document.getElementById('profile-file-input').click()">
+                        <div id="profile-avatar-display" class="w-full h-full bg-slate-100 rounded-[2rem] flex items-center justify-center text-4xl overflow-hidden border">👤</div>
+                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 rounded-[2rem] flex items-center justify-center text-white text-xs font-black transition-all">IDENTIFY</div>
+                        <input type="file" id="profile-file-input" class="hidden" accept="image/*">
+                    </div>
+                    <h3 id="set-name-title" class="text-xl font-black text-slate-800">Verified User</h3>
+                    <p id="set-school-display" class="text-[10px] font-bold text-slate-400 uppercase mb-2">School</p>
+                    <p id="set-district-display" class="text-[9px] font-black text-slate-500 uppercase mb-2 tracking-widest"></p>
+                    <p id="set-phone-display" class="text-[10px] font-black text-blue-600 mb-8 tracking-widest"></p>
+                    <button id="btn-logout" class="w-full py-4 text-red-500 font-black uppercase text-[10px] tracking-widest border border-red-50 rounded-xl hover:bg-red-50">Secure Sign Out</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Bottom Nav -->
+        <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex items-center justify-around h-16 z-50 px-2">
+            <button onclick="switchTab('dashboard')" id="mob-dashboard" class="flex flex-col items-center w-full text-slate-400"><i class="fas fa-th-large"></i><span class="text-[7px] font-black uppercase mt-1">Home</span></button>
+            <button onclick="switchTab('analytics')" id="mob-analytics" class="flex flex-col items-center w-full text-slate-400"><i class="fas fa-chart-line"></i><span class="text-[7px] font-black uppercase mt-1">Stats</span></button>
+            <button onclick="switchTab('planner')" id="mob-planner" class="flex flex-col items-center w-full text-slate-400"><i class="fas fa-calendar-alt"></i><span class="text-[7px] font-black uppercase mt-1">Plan</span></button>
+            <button onclick="switchTab('notes')" id="mob-notes" class="flex flex-col items-center w-full text-slate-400"><i class="fas fa-sticky-note"></i><span class="text-[7px] font-black uppercase mt-1">Notes</span></button>
+            <button onclick="switchTab('settings')" id="mob-settings" class="flex flex-col items-center w-full text-slate-400"><i class="fas fa-cog"></i><span class="text-[7px] font-black uppercase mt-1">Set</span></button>
+        </nav>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, addDoc, deleteDoc, updateDoc, serverTimestamp, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyANauA3o8fRpcHkbrrFk6Nq9UrcYTBs6MQ",
+            authDomain: "bye-app-ed194.firebaseapp.com",
+            databaseURL: "https://bye-app-ed194-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "bye-app-ed194",
+            storageBucket: "bye-app-ed194.firebasestorage.app",
+            messagingSenderId: "126852516020",
+            appId: "1:126852516020:web:8ed8dd5f3b6811ddbaefe1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const APP_ID = 'bye-study-ultimate-v1'; 
+
+        let currentUser = null, userData = {}, marks = [], notes = [], plans = [], mainChart = null, subjectChart = null, profileBase64 = null;
+
+        const notify = (msg) => {
+            document.getElementById('notif-message').innerText = msg;
+            document.getElementById('notification-toast').classList.add('show');
+            setTimeout(() => document.getElementById('notification-toast').classList.remove('show'), 3000);
+        };
+
+        const sanitize = (str) => {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        };
+
+        // Profile Avatar Preview
+        document.getElementById('setup-avatar-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.size < 800000) { 
+                const reader = new FileReader();
+                reader.onload = e => {
+                    profileBase64 = e.target.result;
+                    document.getElementById('setup-avatar-preview').src = profileBase64;
+                    document.getElementById('setup-avatar-preview').classList.remove('hidden');
+                    document.getElementById('upload-icon').classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            } else notify("Image too large (Max 800KB)");
+        });
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                const snap = await getDoc(doc(db, 'artifacts', APP_ID, 'users', user.uid, 'profile', 'data'));
+                document.getElementById('loading-spinner').classList.add('hidden');
+                
+                if (snap.exists()) {
+                    userData = snap.data();
+                    const isAccessGranted = localStorage.getItem('bye_study_auth_session') === 'true';
+                    if (isAccessGranted) enterApp();
+                    else {
+                        document.getElementById('login-form').classList.remove('hidden');
+                        document.getElementById('login-phone-display').innerText = `Verified: ${userData.phone.substring(0,3)}****`;
+                    }
+                } else document.getElementById('setup-form').classList.remove('hidden');
+                syncData();
+            } else await signInAnonymously(auth);
+        });
+
+        const enterApp = () => {
+            document.getElementById('auth-overlay').classList.add('hidden');
+            document.getElementById('app-container').classList.remove('hidden');
+            updateProfileUI();
+            switchTab('dashboard');
+        };
+
+        const updateProfileUI = () => {
+            document.getElementById('set-name-title').innerText = sanitize(userData.name);
+            document.getElementById('side-username').innerText = sanitize(userData.name);
+            document.getElementById('set-school-display').innerText = sanitize(userData.school);
+            document.getElementById('set-district-display').innerText = sanitize(userData.district);
+            document.getElementById('set-phone-display').innerText = `VERIFIED: ${userData.phone}`;
+            
+            const imgHtml = userData.profilePic ? `<img src="${userData.profilePic}" class="w-full h-full object-cover">` : `👤`;
+            document.getElementById('side-avatar-container').innerHTML = imgHtml;
+            document.getElementById('top-avatar-container').innerHTML = imgHtml;
+            document.getElementById('profile-avatar-display').innerHTML = imgHtml;
+        };
+
+        const syncData = () => {
+            const up = ['artifacts', APP_ID, 'users', currentUser.uid];
+            onSnapshot(collection(db, ...up, 'marks'), s => { 
+                marks = s.docs.map(d => ({id: d.id, ...d.data()})).sort((a,b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0)); 
+                renderMarks(); 
+                renderPerformanceOverview();
+                updateSubjectDropdown();
+            });
+            onSnapshot(collection(db, ...up, 'notes'), s => { 
+                notes = s.docs.map(d => ({id: d.id, ...d.data()})); 
+                renderNotes(); 
+            });
+            onSnapshot(collection(db, ...up, 'plans'), s => { 
+                plans = s.docs.map(d => ({id: d.id, ...d.data()})); 
+                renderPlans(); 
+            });
+        };
+
+        document.getElementById('btn-register').onclick = async () => {
+            const name = document.getElementById('reg-name').value, phone = document.getElementById('reg-phone').value, 
+                  school = document.getElementById('reg-school').value, dist = document.getElementById('reg-district').value, 
+                  pass = document.getElementById('reg-pass').value;
+            if (!name || !phone || !school || !dist || !pass) return notify("All fields mandatory!");
+            userData = { name, phone, school, district: dist, password: pass, profilePic: profileBase64 || null };
+            await setDoc(doc(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'profile', 'data'), userData);
+            localStorage.setItem('bye_study_auth_session', 'true'); 
+            enterApp();
+        };
+
+        document.getElementById('btn-login').onclick = () => {
+            if (document.getElementById('login-pass').value === userData.password) {
+                localStorage.setItem('bye_study_auth_session', 'true'); 
+                enterApp();
+            } else notify("Access Denied: Invalid PIN");
+        };
+
+        window.switchTab = (id) => {
+            const views = ['dashboard', 'analytics', 'notes', 'planner', 'settings'];
+            views.forEach(v => {
+                document.getElementById(`view-${v}`)?.classList.add('hidden');
+                document.getElementById(`nav-${v}`)?.classList.remove('sidebar-active');
+                document.getElementById(`mob-${v}`)?.classList.remove('text-blue-600');
+            });
+            document.getElementById(`view-${id}`)?.classList.remove('hidden');
+            document.getElementById(`nav-${id}`)?.classList.add('sidebar-active');
+            document.getElementById(`mob-${id}`)?.classList.add('text-blue-600');
+            document.getElementById('view-title').innerText = id.toUpperCase();
+            if (id === 'analytics') setTimeout(renderCharts, 100);
+        };
+
+        document.getElementById('btn-save-mark').onclick = async () => {
+            const sub = document.getElementById('input-subject').value.toUpperCase().trim(), 
+                  sc = parseInt(document.getElementById('input-score').value);
+            if (!sub || isNaN(sc)) return notify("Invalid Data");
+            await addDoc(collection(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'marks'), { subject: sub, score: sc, timestamp: serverTimestamp() });
+            document.getElementById('input-subject').value = ''; document.getElementById('input-score').value = '';
+        };
+
+        const renderMarks = () => {
+            const displayMarks = [...marks].reverse(); // Most recent first in grid
+            document.getElementById('marks-grid').innerHTML = displayMarks.map(m => `
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm relative group">
+                    <button onclick="window.delData('marks','${m.id}')" class="absolute top-2 right-2 text-slate-200 hover:text-red-500 opacity-0 group-hover:opacity-100"><i class="fas fa-times"></i></button>
+                    <p class="text-[8px] font-black uppercase text-slate-400 mb-1">${sanitize(m.subject)}</p>
+                    <h4 class="text-xl font-black text-slate-800">${m.score}%</h4>
+                </div>`).join('');
+        };
+
+        const renderPerformanceOverview = () => {
+            const summary = {};
+            marks.forEach(m => { 
+                if(!summary[m.subject]) summary[m.subject] = { t: 0, c: 0 }; 
+                summary[m.subject].t += m.score; summary[m.subject].c++; 
+            });
+            document.getElementById('subject-performance-row').innerHTML = Object.entries(summary).map(([s, d]) => `
+                <div class="bg-white p-5 rounded-[2rem] border border-slate-200 shadow-sm min-w-[130px] text-center">
+                    <p class="text-[8px] font-black uppercase text-slate-400 mb-1">${sanitize(s)}</p>
+                    <span class="text-xl font-black text-slate-800">${Math.round(d.t/d.c)}%</span>
+                </div>`).join('');
+        };
+
+        const updateSubjectDropdown = () => {
+            const subjects = [...new Set(marks.map(m => m.subject))];
+            const select = document.getElementById('anal-subject-select');
+            const currentVal = select.value;
+            select.innerHTML = '<option value="">Choose Subject</option>' + 
+                subjects.map(s => `<option value="${s}">${s}</option>`).join('');
+            if (subjects.includes(currentVal)) select.value = currentVal;
+        };
+
+        const renderCharts = () => {
+            const stats = {};
+            marks.forEach(m => {
+                if(!stats[m.subject]) stats[m.subject] = { t:0, c:0 };
+                stats[m.subject].t += m.score; stats[m.subject].c++;
+            });
+            const labels = Object.keys(stats);
+            const data = labels.map(l => Math.round(stats[l].t / stats[l].c));
+            const avg = data.length ? Math.round(data.reduce((a,b)=>a+b,0)/data.length) : 0;
+            
+            document.getElementById('anal-overall-percent').innerText = avg + '%';
+            document.getElementById('anal-overall-circle').style.strokeDashoffset = 439.8 - (avg/100)*439.8;
+            
+            const ctxBar = document.getElementById('performanceChart').getContext('2d');
+            if (mainChart) mainChart.destroy();
+            mainChart = new Chart(ctxBar, {
+                type: 'bar',
+                data: { labels, datasets: [{ label: 'Avg Score %', data, backgroundColor: '#f97316', borderRadius: 8 }] },
+                options: { 
+                    responsive: true, maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, max: 100, ticks: { font: { weight: 'bold' } } }, x: { ticks: { font: { weight: 'bold' } } } },
+                    plugins: { legend: { display: false } } 
+                }
+            });
+        };
+
+        document.getElementById('anal-subject-select').onchange = function() {
+            const selected = this.value;
+            if (!selected) {
+                document.getElementById('subject-detail-container').classList.add('hidden');
+                document.getElementById('subject-empty-state').classList.remove('hidden');
+                return;
+            }
+            document.getElementById('subject-detail-container').classList.remove('hidden');
+            document.getElementById('subject-empty-state').classList.add('hidden');
+            renderSpecificSubjectLine(selected);
+        };
+
+        const renderSpecificSubjectLine = (subjectName) => {
+            const subjectData = marks.filter(m => m.subject === subjectName);
+            const scores = subjectData.map(m => m.score);
+            const dates = subjectData.map((m, idx) => `Entry ${idx + 1}`);
+            const latest = scores[scores.length - 1] || 0;
+            const avg = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+
+            // UI Updates
+            document.getElementById('subject-latest-score').innerText = latest + '%';
+            const badge = document.getElementById('subject-badge');
+            const summary = document.getElementById('subject-summary-text');
+            
+            if (avg >= 75) {
+                badge.innerText = "Excellent / හොදටම පුළුවන්";
+                badge.className = "px-6 py-3 rounded-2xl font-black text-xs uppercase mb-4 tracking-widest badge-excellent";
+                summary.innerText = "ඔබ මෙම විෂය පිළිබඳව විශිෂ්ට මට්ටමක පසුවේ. ඉදිරියටම යන්න!";
+            } else if (avg >= 45) {
+                badge.innerText = "Average / ටිකක් පුළුවන්";
+                badge.className = "px-6 py-3 rounded-2xl font-black text-xs uppercase mb-4 tracking-widest badge-average";
+                summary.innerText = "තව ටිකක් උත්සාහ කළහොත් මෙම විෂය හොදින් ගොඩදාගත හැක.";
+            } else {
+                badge.innerText = "Needs Work / දුර්වලයි";
+                badge.className = "px-6 py-3 rounded-2xl font-black text-xs uppercase mb-4 tracking-widest badge-needs-work";
+                summary.innerText = "මෙම විෂය සඳහා ඔබගේ අවධානය වැඩිපුර යොමු කළ යුතුය.";
+            }
+
+            // Line Chart
+            const ctxLine = document.getElementById('subjectLineChart').getContext('2d');
+            if (subjectChart) subjectChart.destroy();
+            subjectChart = new Chart(ctxLine, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: 'Progression',
+                        data: scores,
+                        borderColor: '#8b5cf6',
+                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 4,
+                        pointBackgroundColor: '#8b5cf6',
+                        pointRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: { 
+                        y: { beginAtZero: true, max: 100, ticks: { font: { weight: 'bold' } } },
+                        x: { ticks: { font: { weight: 'bold' } } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        };
+
+        window.addNote = async () => { 
+            await addDoc(collection(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'notes'), { title: 'New Note', content: '', timestamp: serverTimestamp() }); 
+        };
+        const renderNotes = () => { 
+            document.getElementById('notes-grid').innerHTML = notes.map(n => `
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-3">
+                    <input type="text" onchange="window.un('${n.id}','title',this.value)" value="${sanitize(n.title)}" class="w-full font-black text-[10px] uppercase outline-none">
+                    <textarea onchange="window.un('${n.id}','content',this.value)" class="w-full h-24 text-[10px] outline-none resize-none">${sanitize(n.content)}</textarea>
+                    <button onclick="window.delData('notes','${n.id}')" class="text-[8px] font-black text-red-300">Wipe Data</button>
+                </div>`).join(''); 
+        };
+        window.un = async (id, f, v) => { await updateDoc(doc(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'notes', id), { [f]: v }); };
+        window.delData = async (col, id) => { 
+            if(confirm("Confirm deletion of sensitive data?")) await deleteDoc(doc(db, 'artifacts', APP_ID, 'users', currentUser.uid, col, id)); 
+        };
+        document.getElementById('btn-logout').onclick = () => { localStorage.removeItem('bye_study_auth_session'); location.reload(); };
+
+        document.getElementById('btn-save-plan').onclick = async () => {
+            const task = document.getElementById('plan-task').value, s = document.getElementById('plan-start').value, e = document.getElementById('plan-end').value;
+            if (!task || !s || !e) return notify("Security: Task incomplete");
+            await addDoc(collection(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'plans'), { task, startTime: s, endTime: e });
+            document.getElementById('plan-task').value = '';
+        };
+        const renderPlans = () => {
+            document.getElementById('plans-grid').innerHTML = plans.map(p => `
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm relative">
+                    <button onclick="window.delData('plans','${p.id}')" class="absolute top-4 right-4 text-slate-200 hover:text-red-500"><i class="fas fa-trash"></i></button>
+                    <p class="text-[9px] font-black uppercase text-purple-600 mb-1">Scheduled Session</p>
+                    <h4 class="text-sm font-black text-slate-800 mb-4">${sanitize(p.task)}</h4>
+                    <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl">
+                        <span class="text-[10px] font-black text-slate-700">${p.startTime} - ${p.endTime}</span>
+                    </div>
+                </div>`).join('');
+        };
+    </script>
+</body>
+</html>
