@@ -36,15 +36,13 @@
         #nav-planner.sidebar-active { background-color: var(--clr-plan); }
         #nav-settings.sidebar-active { background-color: var(--clr-prof); }
 
-        /* --- MOBILE NAV ACTIVE COLORS --- */
-        #mob-dashboard.mobile-active { color: #ef4444 !important; } /* Red */
-        #mob-analytics.mobile-active { color: #22c55e !important; } /* Green */
-        #mob-planner.mobile-active   { color: #eab308 !important; } /* Yellow */
-        #mob-notes.mobile-active     { color: #3b82f6 !important; } /* Blue */
-        #mob-settings.mobile-active  { color: #f97316 !important; } /* Orange */
+        #mob-dashboard.mobile-active { color: #ef4444 !important; }
+        #mob-analytics.mobile-active { color: #22c55e !important; }
+        #mob-planner.mobile-active   { color: #eab308 !important; }
+        #mob-notes.mobile-active     { color: #3b82f6 !important; }
+        #mob-settings.mobile-active  { color: #f97316 !important; }
 
         .mobile-nav-btn { transition: color 0.3s ease; }
-        /* -------------------------------- */
 
         .rainbow-text {
             background: linear-gradient(to right, #ef4444, #f97316, #eab308, #22c55e, #3b82f6, #a855f7, #ec4899);
@@ -173,7 +171,7 @@
                 <button id="btn-login" class="w-full bg-slate-900 text-white py-4 rounded-xl font-black uppercase text-xs tracking-widest shadow-lg active:scale-95">Unlock Data</button>
             </div>
 
-            <p class="text-[9px] text-center text-slate-400 mt-8 font-bold">Powerd By|CN Kodithuwakku</p>
+            <p class="text-[9px] text-center text-slate-400 mt-8 font-bold">Powered By | CN Kodithuwakku</p>
         </div>
     </div>
 
@@ -212,7 +210,14 @@
     <main id="app-container" class="flex-1 flex flex-col relative overflow-hidden hidden">
         <header class="h-16 md:h-20 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0">
             <h2 id="view-title" class="text-sm md:text-lg font-black uppercase tracking-tight text-slate-900 flex-1">Dashboard</h2>
-            <div id="top-avatar-container" class="w-9 h-9 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center font-bold text-sm border border-blue-100 shadow-sm cursor-pointer overflow-hidden" onclick="switchTab('settings')">👤</div>
+            
+            <div class="flex items-center space-x-3">
+                <span class="md:hidden text-xs font-black rainbow-text">Bye-Study</span>
+                
+                <div id="top-avatar-container" class="w-9 h-9 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center font-bold text-sm border border-blue-100 shadow-sm cursor-pointer overflow-hidden" onclick="switchTab('settings')">
+                    👤
+                </div>
+            </div>
         </header>
 
         <div class="flex-1 overflow-y-auto p-4 md:p-8 no-scrollbar pb-24 md:pb-8" id="view-container">
@@ -221,7 +226,7 @@
                     <div class="relative z-10 max-w-2xl">
                         <h3 class="text-xl md:text-2xl font-black mb-4">අධ්‍යාපනයේ වටිනාකම</h3>
                         <p class="text-xs md:text-sm font-medium leading-relaxed opacity-90 text-justify">
-                            අධ්‍යාපනය යනු හුදෙක් දැනුම ලබා ගැනීම පමණක් නොව, පුද්ගලයෙකුගේ චින්තනය සහ පෞරුෂය හැඩගස්වන ප්‍රබලතම මෙවලමයි. එය ලෝකය දෙස විචාරශීලීව බැලීමටත්, අභියෝග හමුවේ නොසැලී සිටීමටත් අවශ්‍ය ශක්තිය ලබා දෙයි. නිවැරදි අධ්‍යාපනයක් තුළින් ලබන විනය සහ අවබෝධය, පුද්ගල සාර්ථකත්වයට මෙන්ම රටක සංවර්ධනයට ද මුල්ගලක් වේ. දැනුම යනු කිසිවෙකුට සොරාගත නොහැකි, ජීවිත කාලය පුරා ඔබ සතු වන වටිනාම සම්පතයි.Bye-Study වැනි මෙවලම් හරහා, අප බලාපොරොත්තු වන්නේ ඉගෙනීම වඩාත් සංවිධානාත්මක සහ කාර්යක්ෂම කරමින් මෙම ගමන පහසු කිරීමයි
+                            අධ්‍යාපනය යනු හුදෙක් දැනුම ලබා ගැනීම පමණක් නොව, පුද්ගලයෙකුගේ චින්තනය සහ පෞරුෂය හැඩගස්වන ප්‍රබලතම මෙවලමයි. එය ලෝකය දෙස විචාරශීලීව බැලීමටත්, අභියෝග හමුවේ නොසැලී සිටීමටත් අවශ්‍ය ශක්තිය ලබා දෙයි. නිවැරදි අධ්‍යාපනයක් තුළින් ලබන විනය සහ අවබෝධය, පුද්ගල සාර්ථකත්වයට මෙන්ම රටක සංවර්ධනයට ද මුල්ගලක් වේ. දැනුම යනු කිසිවෙකුට සොරාගත නොහැකි, ජීවිත කාලය පුරා ඔබ සතු වන වටිනාම සම්පතයි.Bye-Study වැනි මෙවලම් හරහා, අප බලාපොරොත්තු වන්නේ ඉගෙනීම වඩාත් සංවිධානාත්මක සහ කාර්යක්ෂම කරමින් මෙම ගමන පහසු කිරීමයි.
                         </p>
                     </div>
                 </div>
@@ -260,7 +265,6 @@
                         <canvas id="performanceChart"></canvas>
                     </div>
                 </div>
-
                 <div class="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-6">
                     <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                         <div>
@@ -271,29 +275,17 @@
                             <option value="">Choose Subject</option>
                         </select>
                     </div>
-
                     <div id="subject-detail-container" class="hidden">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div class="md:col-span-2 h-[300px]">
                                 <canvas id="subjectLineChart"></canvas>
                             </div>
                             <div class="flex flex-col items-center justify-center p-6 bg-slate-50 rounded-[2rem] text-center">
-                                <p class="text-[9px] font-black uppercase text-slate-400 mb-2">Subject Status</p>
                                 <div id="subject-badge" class="px-6 py-3 rounded-2xl font-black text-xs uppercase mb-4 tracking-widest">Analyze Data</div>
-                                <div class="space-y-1">
-                                    <p class="text-[10px] font-black text-slate-500 uppercase">Latest Entry</p>
-                                    <h4 id="subject-latest-score" class="text-3xl font-black text-slate-800">0%</h4>
-                                </div>
-                                <div class="mt-4 pt-4 border-t border-slate-200 w-full space-y-2">
-                                    <p id="subject-summary-text" class="text-[9px] font-bold text-slate-600 italic">Select subject to view results</p>
-                                </div>
+                                <h4 id="subject-latest-score" class="text-3xl font-black text-slate-800">0%</h4>
+                                <p id="subject-summary-text" class="text-[9px] font-bold text-slate-600 italic mt-4">Select subject to view results</p>
                             </div>
                         </div>
-                    </div>
-
-                    <div id="subject-empty-state" class="text-center py-20 text-slate-300">
-                        <i class="fas fa-chart-area text-4xl mb-4"></i>
-                        <p class="text-xs font-black uppercase tracking-widest">Select a subject above to view progression</p>
                     </div>
                 </div>
             </div>
@@ -411,11 +403,12 @@
                     status: isSuccess ? 'SUCCESS' : 'FAILED'
                 });
                 document.getElementById('plan-check-modal').style.display = 'none';
-                notify(isSuccess ? "Session completed! Well done." : "Session missed. Get back on track.");
+                notify(isSuccess ? "Session completed!" : "Session missed.");
                 activePlanToCheck = null;
             } catch (e) { console.error(e); }
         };
 
+        // Profile Avatar Selection logic
         document.getElementById('setup-avatar-input').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file && file.size < 800000) { 
@@ -488,16 +481,58 @@
             });
         };
 
+        // Full Registration Logic with Profile Picture
         document.getElementById('btn-register').onclick = async () => {
-            const name = document.getElementById('reg-name').value, phone = document.getElementById('reg-phone').value, 
-                  school = document.getElementById('reg-school').value, dist = document.getElementById('reg-district').value, 
+            const name = document.getElementById('reg-name').value, 
+                  phone = document.getElementById('reg-phone').value, 
+                  school = document.getElementById('reg-school').value, 
+                  dist = document.getElementById('reg-district').value, 
                   pass = document.getElementById('reg-pass').value;
+
             if (!name || !phone || !school || !dist || !pass) return notify("All fields mandatory!");
-            userData = { name, phone, school, district: dist, password: pass, profilePic: profileBase64 || null };
-            await setDoc(doc(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'profile', 'data'), userData);
-            localStorage.setItem('bye_study_auth_session', 'true'); 
-            enterApp();
+
+            userData = { 
+                name, 
+                phone, 
+                school, 
+                district: dist, 
+                password: pass, 
+                profilePic: profileBase64 || null 
+            };
+
+            try {
+                await setDoc(doc(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'profile', 'data'), userData);
+                localStorage.setItem('bye_study_auth_session', 'true'); 
+                enterApp();
+                notify("Account created successfully!");
+            } catch (err) {
+                notify("Error saving data");
+            }
         };
+
+        // Settings Profile Pic Update logic
+        document.getElementById('profile-file-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.size < 800000) {
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    const newPic = e.target.result;
+                    try {
+                        await updateDoc(doc(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'profile', 'data'), {
+                            profilePic: newPic
+                        });
+                        userData.profilePic = newPic;
+                        updateProfileUI();
+                        notify("Profile picture updated!");
+                    } catch (err) {
+                        notify("Error updating picture");
+                    }
+                };
+                reader.readAsDataURL(file);
+            } else {
+                notify("Image too large (Max 800KB)");
+            }
+        });
 
         document.getElementById('btn-login').onclick = () => {
             if (document.getElementById('login-pass').value === userData.password) {
@@ -506,14 +541,12 @@
             } else notify("Access Denied: Invalid PIN");
         };
 
-        // --- UPDATED switchTab FUNCTION ---
         window.switchTab = (id) => {
             const views = ['dashboard', 'analytics', 'notes', 'planner', 'settings'];
             views.forEach(v => {
                 document.getElementById(`view-${v}`)?.classList.add('hidden');
                 document.getElementById(`nav-${v}`)?.classList.remove('sidebar-active');
                 
-                // Reset Mobile Nav
                 const mobBtn = document.getElementById(`mob-${v}`);
                 if(mobBtn) {
                     mobBtn.classList.remove('mobile-active');
@@ -524,7 +557,6 @@
             document.getElementById(`view-${id}`)?.classList.remove('hidden');
             document.getElementById(`nav-${id}`)?.classList.add('sidebar-active');
 
-            // Apply Mobile Active Color
             const activeMobBtn = document.getElementById(`mob-${id}`);
             if(activeMobBtn) {
                 activeMobBtn.classList.remove('text-slate-400');
@@ -595,7 +627,7 @@
                 data: { labels, datasets: [{ label: 'Avg Score %', data, backgroundColor: '#f97316', borderRadius: 8 }] },
                 options: { 
                     responsive: true, maintainAspectRatio: false,
-                    scales: { y: { beginAtZero: true, max: 100, ticks: { font: { weight: 'bold' } } }, x: { ticks: { font: { weight: 'bold' } } } },
+                    scales: { y: { beginAtZero: true, max: 100 }, x: { ticks: { font: { weight: 'bold' } } } },
                     plugins: { legend: { display: false } } 
                 }
             });
@@ -605,11 +637,9 @@
             const selected = this.value;
             if (!selected) {
                 document.getElementById('subject-detail-container').classList.add('hidden');
-                document.getElementById('subject-empty-state').classList.remove('hidden');
                 return;
             }
             document.getElementById('subject-detail-container').classList.remove('hidden');
-            document.getElementById('subject-empty-state').classList.add('hidden');
             renderSpecificSubjectLine(selected);
         };
 
@@ -625,17 +655,17 @@
             const summary = document.getElementById('subject-summary-text');
             
             if (avg >= 75) {
-                badge.innerText = "Excellent / හොදටම පුළුවන්";
+                badge.innerText = "Excellent";
                 badge.className = "px-6 py-3 rounded-2xl font-black text-xs uppercase mb-4 tracking-widest badge-excellent";
-                summary.innerText = "ඔබ මෙම විෂය පිළිබඳව විශිෂ්ට මට්ටමක පසුවේ. ඉදිරියටම යන්න!";
+                summary.innerText = "Nīṅkaḷ intap pāṭattil mikach chiṟappāka uḷḷīrkaḷ!";
             } else if (avg >= 50) {
-                badge.innerText = "Average / ටිකක් පුළුවන්";
+                badge.innerText = "Average";
                 badge.className = "px-6 py-3 rounded-2xl font-black text-xs uppercase mb-4 tracking-widest badge-average";
-                summary.innerText = "තව ටිකක් උත්සාහ කළහොත් මෙම විෂය හොදින් ගොඩදාගත හැක.";
+                summary.innerText = "Inṉum siṟitu muyaṟsi seytaal mēlē varalaam.";
             } else {
-                badge.innerText = "Needs Work / දුර්වලයි";
+                badge.innerText = "Needs Work";
                 badge.className = "px-6 py-3 rounded-2xl font-black text-xs uppercase mb-4 tracking-widest badge-needs-work";
-                summary.innerText = "මෙම විෂය සඳහා ඔබගේ අවධානය වැඩිපුර යොමු කළ යුතුය.";
+                summary.innerText = "Intap pāṭattil kūṭutal kaivaṉam tēvai.";
             }
 
             const ctxLine = document.getElementById('subjectLineChart').getContext('2d');
@@ -648,20 +678,13 @@
                         label: 'Progression',
                         data: scores,
                         borderColor: '#8b5cf6',
-                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
                         fill: true,
-                        tension: 0.4,
-                        borderWidth: 4,
-                        pointBackgroundColor: '#8b5cf6',
-                        pointRadius: 6
+                        tension: 0.4
                     }]
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    scales: { 
-                        y: { beginAtZero: true, max: 100, ticks: { font: { weight: 'bold' } } },
-                        x: { ticks: { font: { weight: 'bold' } } }
-                    },
+                    scales: { y: { beginAtZero: true, max: 100 } },
                     plugins: { legend: { display: false } }
                 }
             });
@@ -688,11 +711,7 @@
             const task = document.getElementById('plan-task').value, s = document.getElementById('plan-start').value, e = document.getElementById('plan-end').value;
             if (!task || !s || !e) return notify("Security: Task incomplete");
             await addDoc(collection(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'plans'), { 
-                task, 
-                startTime: s, 
-                endTime: e, 
-                checked: false, 
-                status: 'PENDING' 
+                task, startTime: s, endTime: e, checked: false, status: 'PENDING' 
             });
             document.getElementById('plan-task').value = '';
         };
@@ -700,21 +719,15 @@
         const renderPlans = () => {
             document.getElementById('plans-grid').innerHTML = plans.map(p => {
                 const statusColor = p.status === 'SUCCESS' ? 'text-green-500' : (p.status === 'FAILED' ? 'text-red-500' : 'text-purple-600');
-                const statusIcon = p.status === 'SUCCESS' ? 'fa-check-circle' : (p.status === 'FAILED' ? 'fa-times-circle' : 'fa-clock');
-                
                 return `
                 <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden">
                     <button onclick="window.delData('plans','${p.id}')" class="absolute top-4 right-4 text-slate-200 hover:text-red-500"><i class="fas fa-trash"></i></button>
-                    <div class="flex items-center space-x-2 mb-2">
-                        <i class="fas ${statusIcon} ${statusColor} text-[10px]"></i>
-                        <p class="text-[9px] font-black uppercase ${statusColor} tracking-tighter">${p.status || 'PENDING'}</p>
-                    </div>
+                    <p class="text-[9px] font-black uppercase ${statusColor}">${p.status || 'PENDING'}</p>
                     <h4 class="text-sm font-black text-slate-800 mb-4">${sanitize(p.task)}</h4>
                     <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl">
                         <span class="text-[10px] font-black text-slate-700">${p.startTime} - ${p.endTime}</span>
                     </div>
                     ${p.status === 'SUCCESS' ? '<div class="absolute bottom-0 left-0 w-full h-1 bg-green-500"></div>' : ''}
-                    ${p.status === 'FAILED' ? '<div class="absolute bottom-0 left-0 w-full h-1 bg-red-500"></div>' : ''}
                 </div>`;
             }).join('');
         };
