@@ -14,7 +14,8 @@
         
         :root {
             --primary: #1d4ed8;
-            --bg: #f8fafc;
+            /* Blue and Red Gradient Background */
+            --bg: linear-gradient(to right, blue, red); 
             --clr-dash: #ef4444; 
             --clr-anal: #f97316; 
             --clr-note: #eab308; 
@@ -23,10 +24,24 @@
         }
 
         body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: var(--bg);
+            /* Oyaage settings tika meka thiyenne */
+            font-family: Arial, sans-serif; 
+            background: var(--bg);
+            background-attachment: fixed;
+            margin: 0;
+            padding: 0;
             color: #0f172a;
             font-weight: 600;
+        }
+
+        /* Gradient eka penna app container eka transparent kala */
+        #app-container, aside#sidebar {
+            background: transparent !important;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.9) !important;
+            backdrop-filter: blur(10px);
         }
 
         .sidebar-active { background-color: var(--primary); color: white !important; }
@@ -88,6 +103,11 @@
         .badge-excellent { background: #dcfce7; color: #166534; }
         .badge-average { background: #fef9c3; color: #854d0e; }
         .badge-needs-work { background: #fee2e2; color: #991b1b; }
+
+        /* Sidebar container background white shade for readability */
+        aside#sidebar { border-right: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05) !important; backdrop-filter: blur(10px); }
+        nav button { color: white !important; }
+        #side-username { color: white !important; }
     </style>
 </head>
 <body class="h-screen flex flex-col md:flex-row overflow-hidden">
@@ -232,7 +252,7 @@
                 </div>
 
                 <div class="space-y-3">
-                    <p class="text-[9px] font-black uppercase tracking-widest text-slate-400">Security Check: All Systems Active</p>
+                    <p class="text-[9px] font-black uppercase tracking-widest text-slate-100">Security Check: All Systems Active</p>
                     <div id="subject-performance-row" class="flex space-x-4 overflow-x-auto no-scrollbar pb-2"></div>
                 </div>
 
@@ -408,7 +428,6 @@
             } catch (e) { console.error(e); }
         };
 
-        // Profile Avatar Selection logic
         document.getElementById('setup-avatar-input').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file && file.size < 800000) { 
@@ -481,7 +500,6 @@
             });
         };
 
-        // Full Registration Logic with Profile Picture
         document.getElementById('btn-register').onclick = async () => {
             const name = document.getElementById('reg-name').value, 
                   phone = document.getElementById('reg-phone').value, 
@@ -510,7 +528,6 @@
             }
         };
 
-        // Settings Profile Pic Update logic
         document.getElementById('profile-file-input').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file && file.size < 800000) {
@@ -657,15 +674,15 @@
             if (avg >= 75) {
                 badge.innerText = "Excellent";
                 badge.className = "px-6 py-3 rounded-2xl font-black text-xs uppercase mb-4 tracking-widest badge-excellent";
-                summary.innerText = "Your Are in Very Excellent Mode!";
+                summary.innerText = "Nīṅkaḷ intap pāṭattil mikach chiṟappāka uḷḷīrkaḷ!";
             } else if (avg >= 50) {
                 badge.innerText = "Average";
                 badge.className = "px-6 py-3 rounded-2xl font-black text-xs uppercase mb-4 tracking-widest badge-average";
-                summary.innerText = "You Are Medium.Come To Seen.Hurry Up..";
+                summary.innerText = "Inṉum siṟitu muyaṟsi seytaal mēlē varalaam.";
             } else {
                 badge.innerText = "Needs Work";
                 badge.className = "px-6 py-3 rounded-2xl font-black text-xs uppercase mb-4 tracking-widest badge-needs-work";
-                summary.innerText = "You are very weak. If you keep going like this, you will fail. Start working.";
+                summary.innerText = "Intap pāṭattil kūṭutal kaivaṉam tēvai.";
             }
 
             const ctxLine = document.getElementById('subjectLineChart').getContext('2d');
