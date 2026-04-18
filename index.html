@@ -59,6 +59,16 @@
         .input-rose { background-color: #fff1f2; border-color: #ffe4e6; }
         .input-yellow { background-color: #fefce8; border-color: #fef9c3; }
 
+        /* Modal Styles */
+        .modal-backdrop {
+            display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(4px); z-index: 10000; align-items: center; justify-content: center; padding: 20px;
+        }
+        .modal-content {
+            background: white; width: 100%; max-width: 400px; padding: 2rem; border-radius: 2.5rem;
+            text-align: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
         .profile-upload-area {
             width: 100px; height: 100px; border-radius: 30px; 
             border: 2px dashed #cbd5e1; display: flex; align-items: center; 
@@ -74,6 +84,19 @@
     </style>
 </head>
 <body class="h-screen flex flex-col md:flex-row overflow-hidden">
+
+    <!-- Plan Completion Modal -->
+    <div id="plan-check-modal" class="modal-backdrop">
+        <div class="modal-content">
+            <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-6">🎯</div>
+            <h2 class="text-xl font-black text-slate-900 mb-2">Session Complete!</h2>
+            <p class="text-xs text-slate-500 mb-6">Did you successfully complete "<span id="check-task-name" class="font-black text-purple-600">---</span>"?</p>
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="window.submitPlanResult(true)" class="bg-green-600 text-white py-4 rounded-xl font-black text-[10px] uppercase shadow-lg active:scale-95">Completed</button>
+                <button onclick="window.submitPlanResult(false)" class="bg-red-500 text-white py-4 rounded-xl font-black text-[10px] uppercase shadow-lg active:scale-95">Missed</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Notifications -->
     <div id="notification-toast" class="bg-white border-2 border-slate-200 p-4 rounded-2xl shadow-2xl flex items-center space-x-4">
@@ -146,7 +169,7 @@
                 <button id="btn-login" class="w-full bg-slate-900 text-white py-4 rounded-xl font-black uppercase text-xs tracking-widest shadow-lg active:scale-95">Unlock Data</button>
             </div>
 
-            <p class="text-[9px] text-center text-slate-400 mt-8 font-bold">Encrypted Connection | CN Kodithuwakku</p>
+            <p class="text-[9px] text-center text-slate-400 mt-8 font-bold">Powerd By|CN Kodithuwakku</p>
         </div>
     </div>
 
@@ -221,7 +244,6 @@
 
             <!-- View: Analytics -->
             <div id="view-analytics" class="hidden space-y-8">
-                <!-- Row 1: Overall and Bar Chart -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm flex flex-col items-center justify-center text-center">
                         <p class="text-[10px] font-black uppercase text-orange-500 tracking-widest mb-6">Overall Average</p>
@@ -239,7 +261,6 @@
                     </div>
                 </div>
 
-                <!-- Row 2: Subject-Specific Progress -->
                 <div class="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-6">
                     <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                         <div>
@@ -253,16 +274,12 @@
 
                     <div id="subject-detail-container" class="hidden">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <!-- Line Chart for Subject -->
                             <div class="md:col-span-2 h-[300px]">
                                 <canvas id="subjectLineChart"></canvas>
                             </div>
-                            <!-- Subject Profile -->
                             <div class="flex flex-col items-center justify-center p-6 bg-slate-50 rounded-[2rem] text-center">
                                 <p class="text-[9px] font-black uppercase text-slate-400 mb-2">Subject Status</p>
-                                <div id="subject-badge" class="px-6 py-3 rounded-2xl font-black text-xs uppercase mb-4 tracking-widest">
-                                    Analyze Data
-                                </div>
+                                <div id="subject-badge" class="px-6 py-3 rounded-2xl font-black text-xs uppercase mb-4 tracking-widest">Analyze Data</div>
                                 <div class="space-y-1">
                                     <p class="text-[10px] font-black text-slate-500 uppercase">Latest Entry</p>
                                     <h4 id="subject-latest-score" class="text-3xl font-black text-slate-800">0%</h4>
@@ -289,7 +306,7 @@
                         <input type="text" id="plan-task" placeholder="Task Name" class="p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold text-sm">
                         <input type="time" id="plan-start" class="p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold text-sm">
                         <input type="time" id="plan-end" class="p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold text-sm">
-                        <button id="btn-save-plan" class="bg-purple-600 text-white px-8 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest">Lock Task</button>
+                        <button id="btn-save-plan" class="bg-purple-600 text-white px-8 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg active:scale-95">Lock Task</button>
                     </div>
                 </div>
                 <div id="plans-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
@@ -331,12 +348,11 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, addDoc, deleteDoc, updateDoc, serverTimestamp, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, addDoc, deleteDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyANauA3o8fRpcHkbrrFk6Nq9UrcYTBs6MQ",
             authDomain: "bye-app-ed194.firebaseapp.com",
-            databaseURL: "https://bye-app-ed194-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "bye-app-ed194",
             storageBucket: "bye-app-ed194.firebasestorage.app",
             messagingSenderId: "126852516020",
@@ -348,7 +364,7 @@
         const db = getFirestore(app);
         const APP_ID = 'bye-study-ultimate-v1'; 
 
-        let currentUser = null, userData = {}, marks = [], notes = [], plans = [], mainChart = null, subjectChart = null, profileBase64 = null;
+        let currentUser = null, userData = {}, marks = [], notes = [], plans = [], mainChart = null, subjectChart = null, profileBase64 = null, activePlanToCheck = null;
 
         const notify = (msg) => {
             document.getElementById('notif-message').innerText = msg;
@@ -360,6 +376,40 @@
             const div = document.createElement('div');
             div.textContent = str;
             return div.innerHTML;
+        };
+
+        // Plan Completion Engine Logic
+        const startPlanChecker = () => {
+            setInterval(() => {
+                const now = new Date();
+                const currentStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+                plans.forEach(plan => {
+                    // Check if current time matches end time and it hasn't been checked yet
+                    if (plan.endTime === currentStr && !plan.checked) {
+                        showPlanCheckModal(plan);
+                    }
+                });
+            }, 20000); 
+        };
+
+        const showPlanCheckModal = (plan) => {
+            if (activePlanToCheck) return;
+            activePlanToCheck = plan;
+            document.getElementById('check-task-name').innerText = plan.task;
+            document.getElementById('plan-check-modal').style.display = 'flex';
+        };
+
+        window.submitPlanResult = async (isSuccess) => {
+            if (!activePlanToCheck || !currentUser) return;
+            try {
+                await updateDoc(doc(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'plans', activePlanToCheck.id), {
+                    checked: true,
+                    status: isSuccess ? 'SUCCESS' : 'FAILED'
+                });
+                document.getElementById('plan-check-modal').style.display = 'none';
+                notify(isSuccess ? "Session completed! Well done." : "Session missed. Get back on track.");
+                activePlanToCheck = null;
+            } catch (e) { console.error(e); }
         };
 
         // Profile Avatar Preview
@@ -393,6 +443,7 @@
                     }
                 } else document.getElementById('setup-form').classList.remove('hidden');
                 syncData();
+                startPlanChecker(); // Initialized Engine
             } else await signInAnonymously(auth);
         });
 
@@ -475,7 +526,7 @@
         };
 
         const renderMarks = () => {
-            const displayMarks = [...marks].reverse(); // Most recent first in grid
+            const displayMarks = [...marks].reverse();
             document.getElementById('marks-grid').innerHTML = displayMarks.map(m => `
                 <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm relative group">
                     <button onclick="window.delData('marks','${m.id}')" class="absolute top-2 right-2 text-slate-200 hover:text-red-500 opacity-0 group-hover:opacity-100"><i class="fas fa-times"></i></button>
@@ -551,7 +602,6 @@
             const latest = scores[scores.length - 1] || 0;
             const avg = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
 
-            // UI Updates
             document.getElementById('subject-latest-score').innerText = latest + '%';
             const badge = document.getElementById('subject-badge');
             const summary = document.getElementById('subject-summary-text');
@@ -570,7 +620,6 @@
                 summary.innerText = "මෙම විෂය සඳහා ඔබගේ අවධානය වැඩිපුර යොමු කළ යුතුය.";
             }
 
-            // Line Chart
             const ctxLine = document.getElementById('subjectLineChart').getContext('2d');
             if (subjectChart) subjectChart.destroy();
             subjectChart = new Chart(ctxLine, {
@@ -613,26 +662,44 @@
         };
         window.un = async (id, f, v) => { await updateDoc(doc(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'notes', id), { [f]: v }); };
         window.delData = async (col, id) => { 
-            if(confirm("Confirm deletion of sensitive data?")) await deleteDoc(doc(db, 'artifacts', APP_ID, 'users', currentUser.uid, col, id)); 
+            if(confirm("Confirm deletion?")) await deleteDoc(doc(db, 'artifacts', APP_ID, 'users', currentUser.uid, col, id)); 
         };
         document.getElementById('btn-logout').onclick = () => { localStorage.removeItem('bye_study_auth_session'); location.reload(); };
 
         document.getElementById('btn-save-plan').onclick = async () => {
             const task = document.getElementById('plan-task').value, s = document.getElementById('plan-start').value, e = document.getElementById('plan-end').value;
             if (!task || !s || !e) return notify("Security: Task incomplete");
-            await addDoc(collection(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'plans'), { task, startTime: s, endTime: e });
+            await addDoc(collection(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'plans'), { 
+                task, 
+                startTime: s, 
+                endTime: e, 
+                checked: false, 
+                status: 'PENDING' 
+            });
             document.getElementById('plan-task').value = '';
         };
+
         const renderPlans = () => {
-            document.getElementById('plans-grid').innerHTML = plans.map(p => `
-                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm relative">
+            document.getElementById('plans-grid').innerHTML = plans.map(p => {
+                const isChecked = p.checked;
+                const statusColor = p.status === 'SUCCESS' ? 'text-green-500' : (p.status === 'FAILED' ? 'text-red-500' : 'text-purple-600');
+                const statusIcon = p.status === 'SUCCESS' ? 'fa-check-circle' : (p.status === 'FAILED' ? 'fa-times-circle' : 'fa-clock');
+                
+                return `
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden">
                     <button onclick="window.delData('plans','${p.id}')" class="absolute top-4 right-4 text-slate-200 hover:text-red-500"><i class="fas fa-trash"></i></button>
-                    <p class="text-[9px] font-black uppercase text-purple-600 mb-1">Scheduled Session</p>
+                    <div class="flex items-center space-x-2 mb-2">
+                        <i class="fas ${statusIcon} ${statusColor} text-[10px]"></i>
+                        <p class="text-[9px] font-black uppercase ${statusColor} tracking-tighter">${p.status || 'PENDING'}</p>
+                    </div>
                     <h4 class="text-sm font-black text-slate-800 mb-4">${sanitize(p.task)}</h4>
                     <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl">
                         <span class="text-[10px] font-black text-slate-700">${p.startTime} - ${p.endTime}</span>
                     </div>
-                </div>`).join('');
+                    ${p.status === 'SUCCESS' ? '<div class="absolute bottom-0 left-0 w-full h-1 bg-green-500"></div>' : ''}
+                    ${p.status === 'FAILED' ? '<div class="absolute bottom-0 left-0 w-full h-1 bg-red-500"></div>' : ''}
+                </div>`;
+            }).join('');
         };
     </script>
 </body>
