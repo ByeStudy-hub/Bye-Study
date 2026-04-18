@@ -36,6 +36,16 @@
         #nav-planner.sidebar-active { background-color: var(--clr-plan); }
         #nav-settings.sidebar-active { background-color: var(--clr-prof); }
 
+        /* --- MOBILE NAV ACTIVE COLORS --- */
+        #mob-dashboard.mobile-active { color: #ef4444 !important; } /* Red */
+        #mob-analytics.mobile-active { color: #22c55e !important; } /* Green */
+        #mob-planner.mobile-active   { color: #eab308 !important; } /* Yellow */
+        #mob-notes.mobile-active     { color: #3b82f6 !important; } /* Blue */
+        #mob-settings.mobile-active  { color: #f97316 !important; } /* Orange */
+
+        .mobile-nav-btn { transition: color 0.3s ease; }
+        /* -------------------------------- */
+
         .rainbow-text {
             background: linear-gradient(to right, #ef4444, #f97316, #eab308, #22c55e, #3b82f6, #a855f7, #ec4899);
             -webkit-background-clip: text;
@@ -59,7 +69,6 @@
         .input-rose { background-color: #fff1f2; border-color: #ffe4e6; }
         .input-yellow { background-color: #fefce8; border-color: #fef9c3; }
 
-        /* Modal Styles */
         .modal-backdrop {
             display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8);
             backdrop-filter: blur(4px); z-index: 10000; align-items: center; justify-content: center; padding: 20px;
@@ -85,7 +94,6 @@
 </head>
 <body class="h-screen flex flex-col md:flex-row overflow-hidden">
 
-    <!-- Plan Completion Modal -->
     <div id="plan-check-modal" class="modal-backdrop">
         <div class="modal-content">
             <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-6">🎯</div>
@@ -98,7 +106,6 @@
         </div>
     </div>
 
-    <!-- Notifications -->
     <div id="notification-toast" class="bg-white border-2 border-slate-200 p-4 rounded-2xl shadow-2xl flex items-center space-x-4">
         <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shrink-0">
             <i class="fas fa-shield-alt"></i>
@@ -106,7 +113,6 @@
         <p id="notif-message" class="text-xs font-black text-slate-800 leading-tight">Secure Access Granted</p>
     </div>
 
-    <!-- Auth Overlay -->
     <div id="auth-overlay" class="fixed inset-0 z-[1000] bg-slate-50 flex items-center justify-center p-6 overflow-y-auto">
         <div class="w-full max-w-md bg-white p-8 md:p-10 rounded-[2.5rem] shadow-2xl border border-slate-100 my-auto">
             <div class="flex justify-center mb-6">
@@ -118,7 +124,6 @@
                 <p class="mt-4 text-[10px] font-bold uppercase text-slate-400 tracking-widest text-center">Encrypting Session...</p>
             </div>
 
-            <!-- Registration -->
             <div id="setup-form" class="hidden space-y-4">
                 <div class="text-center mb-4">
                     <h1 class="text-2xl font-black text-slate-800">Secure Setup</h1>
@@ -159,7 +164,6 @@
                 <button id="btn-register" class="w-full bg-slate-900 text-white py-4 rounded-xl font-black uppercase text-xs tracking-widest shadow-lg active:scale-95">Verify & Create</button>
             </div>
 
-            <!-- PIN Login -->
             <div id="login-form" class="hidden space-y-4">
                 <div class="text-center">
                     <h1 class="text-2xl font-black text-slate-800">Secure Vault</h1>
@@ -173,7 +177,6 @@
         </div>
     </div>
 
-    <!-- Desktop Sidebar -->
     <aside id="sidebar" class="hidden md:flex w-64 bg-white border-r border-slate-200 flex-col shrink-0">
         <div class="p-8 text-center">
             <span class="text-xl font-black rainbow-text">Bye-Study</span>
@@ -206,7 +209,6 @@
         </div>
     </aside>
 
-    <!-- Main Content -->
     <main id="app-container" class="flex-1 flex flex-col relative overflow-hidden hidden">
         <header class="h-16 md:h-20 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0">
             <h2 id="view-title" class="text-sm md:text-lg font-black uppercase tracking-tight text-slate-900 flex-1">Dashboard</h2>
@@ -214,7 +216,6 @@
         </header>
 
         <div class="flex-1 overflow-y-auto p-4 md:p-8 no-scrollbar pb-24 md:pb-8" id="view-container">
-            <!-- View: Dashboard -->
             <div id="view-dashboard" class="space-y-6">
                 <div class="bg-gradient-to-br from-slate-900 to-blue-950 p-6 md:p-10 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
                     <div class="relative z-10 max-w-2xl">
@@ -242,7 +243,6 @@
                 <div id="marks-grid" class="grid grid-cols-2 lg:grid-cols-4 gap-4"></div>
             </div>
 
-            <!-- View: Analytics -->
             <div id="view-analytics" class="hidden space-y-8">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm flex flex-col items-center justify-center text-center">
@@ -298,7 +298,6 @@
                 </div>
             </div>
 
-            <!-- View: Planner -->
             <div id="view-planner" class="hidden space-y-6">
                 <div class="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm space-y-4">
                     <h3 class="text-[10px] font-black uppercase text-purple-600 tracking-widest">Plan Study</h3>
@@ -312,13 +311,11 @@
                 <div id="plans-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
             </div>
 
-            <!-- View: Notes -->
             <div id="view-notes" class="hidden space-y-6">
                 <button onclick="addNote()" class="w-full py-4 bg-yellow-500 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-md">+ Protected Note</button>
                 <div id="notes-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
             </div>
 
-            <!-- View: Settings/Profile -->
             <div id="view-settings" class="hidden max-w-md mx-auto space-y-6 pb-12">
                 <div class="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm text-center">
                     <div class="relative w-24 h-24 mx-auto mb-4 cursor-pointer group" onclick="document.getElementById('profile-file-input').click()">
@@ -335,13 +332,22 @@
             </div>
         </div>
 
-        <!-- Mobile Bottom Nav -->
         <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex items-center justify-around h-16 z-50 px-2">
-            <button onclick="switchTab('dashboard')" id="mob-dashboard" class="flex flex-col items-center w-full text-slate-400"><i class="fas fa-th-large"></i><span class="text-[7px] font-black uppercase mt-1">Home</span></button>
-            <button onclick="switchTab('analytics')" id="mob-analytics" class="flex flex-col items-center w-full text-slate-400"><i class="fas fa-chart-line"></i><span class="text-[7px] font-black uppercase mt-1">Stats</span></button>
-            <button onclick="switchTab('planner')" id="mob-planner" class="flex flex-col items-center w-full text-slate-400"><i class="fas fa-calendar-alt"></i><span class="text-[7px] font-black uppercase mt-1">Plan</span></button>
-            <button onclick="switchTab('notes')" id="mob-notes" class="flex flex-col items-center w-full text-slate-400"><i class="fas fa-sticky-note"></i><span class="text-[7px] font-black uppercase mt-1">Notes</span></button>
-            <button onclick="switchTab('settings')" id="mob-settings" class="flex flex-col items-center w-full text-slate-400"><i class="fas fa-cog"></i><span class="text-[7px] font-black uppercase mt-1">Set</span></button>
+            <button onclick="switchTab('dashboard')" id="mob-dashboard" class="mobile-nav-btn flex flex-col items-center w-full text-slate-400">
+                <i class="fas fa-th-large"></i><span class="text-[7px] font-black uppercase mt-1">Home</span>
+            </button>
+            <button onclick="switchTab('analytics')" id="mob-analytics" class="mobile-nav-btn flex flex-col items-center w-full text-slate-400">
+                <i class="fas fa-chart-line"></i><span class="text-[7px] font-black uppercase mt-1">Stats</span>
+            </button>
+            <button onclick="switchTab('planner')" id="mob-planner" class="mobile-nav-btn flex flex-col items-center w-full text-slate-400">
+                <i class="fas fa-calendar-alt"></i><span class="text-[7px] font-black uppercase mt-1">Plan</span>
+            </button>
+            <button onclick="switchTab('notes')" id="mob-notes" class="mobile-nav-btn flex flex-col items-center w-full text-slate-400">
+                <i class="fas fa-sticky-note"></i><span class="text-[7px] font-black uppercase mt-1">Notes</span>
+            </button>
+            <button onclick="switchTab('settings')" id="mob-settings" class="mobile-nav-btn flex flex-col items-center w-full text-slate-400">
+                <i class="fas fa-cog"></i><span class="text-[7px] font-black uppercase mt-1">Set</span>
+            </button>
         </nav>
     </main>
 
@@ -378,13 +384,11 @@
             return div.innerHTML;
         };
 
-        // Plan Completion Engine Logic
         const startPlanChecker = () => {
             setInterval(() => {
                 const now = new Date();
                 const currentStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
                 plans.forEach(plan => {
-                    // Check if current time matches end time and it hasn't been checked yet
                     if (plan.endTime === currentStr && !plan.checked) {
                         showPlanCheckModal(plan);
                     }
@@ -412,7 +416,6 @@
             } catch (e) { console.error(e); }
         };
 
-        // Profile Avatar Preview
         document.getElementById('setup-avatar-input').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file && file.size < 800000) { 
@@ -443,7 +446,7 @@
                     }
                 } else document.getElementById('setup-form').classList.remove('hidden');
                 syncData();
-                startPlanChecker(); // Initialized Engine
+                startPlanChecker(); 
             } else await signInAnonymously(auth);
         });
 
@@ -503,16 +506,31 @@
             } else notify("Access Denied: Invalid PIN");
         };
 
+        // --- UPDATED switchTab FUNCTION ---
         window.switchTab = (id) => {
             const views = ['dashboard', 'analytics', 'notes', 'planner', 'settings'];
             views.forEach(v => {
                 document.getElementById(`view-${v}`)?.classList.add('hidden');
                 document.getElementById(`nav-${v}`)?.classList.remove('sidebar-active');
-                document.getElementById(`mob-${v}`)?.classList.remove('text-blue-600');
+                
+                // Reset Mobile Nav
+                const mobBtn = document.getElementById(`mob-${v}`);
+                if(mobBtn) {
+                    mobBtn.classList.remove('mobile-active');
+                    mobBtn.classList.add('text-slate-400');
+                }
             });
+
             document.getElementById(`view-${id}`)?.classList.remove('hidden');
             document.getElementById(`nav-${id}`)?.classList.add('sidebar-active');
-            document.getElementById(`mob-${id}`)?.classList.add('text-blue-600');
+
+            // Apply Mobile Active Color
+            const activeMobBtn = document.getElementById(`mob-${id}`);
+            if(activeMobBtn) {
+                activeMobBtn.classList.remove('text-slate-400');
+                activeMobBtn.classList.add('mobile-active');
+            }
+
             document.getElementById('view-title').innerText = id.toUpperCase();
             if (id === 'analytics') setTimeout(renderCharts, 100);
         };
@@ -681,7 +699,6 @@
 
         const renderPlans = () => {
             document.getElementById('plans-grid').innerHTML = plans.map(p => {
-                const isChecked = p.checked;
                 const statusColor = p.status === 'SUCCESS' ? 'text-green-500' : (p.status === 'FAILED' ? 'text-red-500' : 'text-purple-600');
                 const statusIcon = p.status === 'SUCCESS' ? 'fa-check-circle' : (p.status === 'FAILED' ? 'fa-times-circle' : 'fa-clock');
                 
