@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bye-Study | Process Platform</title>
+    <title>👋 Bye-Study | Process Platform</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -472,7 +472,7 @@
                     status: isSuccess ? 'SUCCESS' : 'FAILED'
                 });
                 document.getElementById('plan-check-modal').style.display = 'none';
-                notify(isSuccess ? "Session completed!" : "Session missed.");
+                notify(isSuccess ? "Session completed.niyamayi machan!" : "Session missed.try your next plan smartly");
                 activePlanToCheck = null;
             } catch (e) { console.error(e); }
         };
@@ -723,15 +723,15 @@
             if (avg >= 75) {
                 badge.innerText = "Excellent";
                 badge.className = "px-6 py-3 rounded-2xl font-black text-xs uppercase mb-4 tracking-widest badge-excellent";
-                summary.innerText = "Nīṅkaḷ intap pāṭattil mikach chiṟappāka uḷḷīrkaḷ!";
+                summary.innerText = "YOU'RE IN EXCELENT MOOD.GO GO LET'S GO!";
             } else if (avg >= 50) {
                 badge.innerText = "Average";
                 badge.className = "px-6 py-3 rounded-2xl font-black text-xs uppercase mb-4 tracking-widest badge-average";
-                summary.innerText = "Inṉum siṟitu muyaṟsi seytaal mēlē varalaam.";
+                summary.innerText = "YOU'RE IN MEDIUM MODE.COME TO SEEN.HURRY UP.";
             } else {
                 badge.innerText = "Needs Work";
                 badge.className = "px-6 py-3 rounded-2xl font-black text-xs uppercase mb-4 tracking-widest badge-needs-work";
-                summary.innerText = "Intap pāṭattil kūṭutal kaivaṉam tēvai.";
+                summary.innerText = "YOU'RE WEAK STUDENT.PLEASE WORK WITH SMART.TRY NOW.";
             }
 
             const ctxLine = document.getElementById('subjectLineChart').getContext('2d');
