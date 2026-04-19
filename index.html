@@ -77,10 +77,10 @@
         }
 
         .profile-upload-area {
-            width: 100px; height: 100px; border-radius: 30px; 
+            width: 120px; height: 120px; border-radius: 40px; 
             border: 2px dashed #cbd5e1; display: flex; align-items: center; 
             justify-content: center; cursor: pointer; overflow: hidden; position: relative;
-            transition: all 0.3s ease;
+            transition: all 0.3s ease; margin: 0 auto;
         }
         .profile-upload-area:hover { border-color: #3b82f6; background: #eff6ff; }
         .profile-upload-area img { width: 100%; height: 100%; object-fit: cover; }
@@ -122,27 +122,14 @@
                 <p class="mt-4 text-[10px] font-bold uppercase text-slate-400 tracking-widest text-center">Encrypting Session...</p>
             </div>
 
-            <div id="setup-form" class="hidden space-y-4">
-                <div class="text-center mb-4">
-                    <h1 class="text-2xl font-black text-slate-800">Secure Setup</h1>
-                    <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Protected Environment</p>
-                </div>
-
-                <div class="flex justify-center mb-4">
-                    <div class="profile-upload-area" onclick="document.getElementById('setup-avatar-input').click()">
-                        <img id="setup-avatar-preview" src="" class="hidden">
-                        <div id="upload-icon" class="text-slate-400 text-center">
-                            <i class="fas fa-user-shield text-xl mb-1"></i>
-                            <p class="text-[8px] font-black uppercase">Identify</p>
-                        </div>
+            <div id="setup-form" class="hidden space-y-6">
+                <div id="setup-step-1" class="space-y-4">
+                    <div class="text-center mb-4">
+                        <h1 class="text-2xl font-black text-slate-800">Identify Yourself</h1>
+                        <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Step 01 / 04</p>
                     </div>
-                    <input type="file" id="setup-avatar-input" class="hidden" accept="image/*">
-                </div>
-                
-                <input type="text" id="reg-name" placeholder="Full Name" class="w-full p-4 input-red border rounded-xl font-bold outline-none text-sm placeholder-red-300">
-                
-                <div class="grid grid-cols-1 gap-3">
-                    <select id="reg-district" class="w-full p-4 input-brown border rounded-xl font-bold outline-none text-sm text-amber-900">
+                    <input type="text" id="reg-name" placeholder="Full Name" required class="w-full p-4 input-red border rounded-xl font-bold outline-none text-sm placeholder-red-300">
+                    <select id="reg-district" required class="w-full p-4 input-brown border rounded-xl font-bold outline-none text-sm text-amber-900">
                         <option value="">Select Your District</option>
                         <option>Colombo</option><option>Gampaha</option><option>Kalutara</option><option>Kandy</option>
                         <option>Matale</option><option>Nuwara Eliya</option><option>Galle</option><option>Matara</option>
@@ -152,14 +139,56 @@
                         <option>Polonnaruwa</option><option>Badulla</option><option>Monaragala</option><option>Ratnapura</option>
                         <option>Kegalle</option>
                     </select>
-                    
-                    <input type="text" id="reg-school" placeholder="School Name" class="w-full p-4 input-green border rounded-xl font-bold outline-none text-sm placeholder-green-300">
-                    <input type="tel" id="reg-phone" placeholder="Phone Number" class="w-full p-4 input-rose border rounded-xl font-bold outline-none text-sm placeholder-rose-300">
+                    <input type="text" id="reg-school" placeholder="School Name" required class="w-full p-4 input-green border rounded-xl font-bold outline-none text-sm placeholder-green-300">
+                    <button onclick="nextStep(2)" class="w-full bg-slate-900 text-white py-4 rounded-xl font-black uppercase text-xs tracking-widest shadow-lg active:scale-95">Next Step</button>
                 </div>
 
-                <input type="password" id="reg-pass" placeholder="Create Secure PIN" class="w-full p-4 input-yellow border rounded-xl font-bold outline-none text-sm placeholder-yellow-500">
-                
-                <button id="btn-register" class="w-full bg-slate-900 text-white py-4 rounded-xl font-black uppercase text-xs tracking-widest shadow-lg active:scale-95">Verify & Create</button>
+                <div id="setup-step-2" class="hidden space-y-4">
+                    <div class="text-center mb-4">
+                        <h1 class="text-2xl font-black text-slate-800">Secure Access</h1>
+                        <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Step 02 / 04</p>
+                    </div>
+                    <input type="tel" id="reg-phone" placeholder="Phone Number (07XXXXXXXX)" required class="w-full p-4 input-rose border rounded-xl font-bold outline-none text-sm placeholder-rose-300">
+                    <input type="password" id="reg-pass" placeholder="Create Secure 4-Digit PIN" maxlength="4" required class="w-full p-4 input-yellow border rounded-xl font-bold outline-none text-sm placeholder-yellow-500">
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="nextStep(1)" class="bg-slate-100 text-slate-500 py-4 rounded-xl font-black uppercase text-xs tracking-widest active:scale-95">Back</button>
+                        <button onclick="initOTP()" class="bg-slate-900 text-white py-4 rounded-xl font-black uppercase text-xs tracking-widest shadow-lg active:scale-95">Send OTP</button>
+                    </div>
+                </div>
+
+                <div id="setup-step-otp" class="hidden space-y-4">
+                    <div class="text-center mb-4">
+                        <h1 class="text-2xl font-black text-slate-800">Verify OTP</h1>
+                        <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Verification Step</p>
+                    </div>
+                    <p class="text-[10px] text-center text-slate-500">Enter the 6-digit code sent via simulation.</p>
+                    <input type="text" id="reg-otp-input" placeholder="000000" maxlength="6" class="w-full p-4 bg-blue-50 border-blue-200 border rounded-xl font-black text-center text-xl tracking-[0.3em] outline-none">
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="nextStep(2)" class="bg-slate-100 text-slate-500 py-4 rounded-xl font-black uppercase text-xs tracking-widest active:scale-95">Back</button>
+                        <button onclick="verifyOTP()" class="bg-blue-600 text-white py-4 rounded-xl font-black uppercase text-xs tracking-widest shadow-lg active:scale-95">Verify</button>
+                    </div>
+                </div>
+
+                <div id="setup-step-3" class="hidden space-y-4">
+                    <div class="text-center mb-4">
+                        <h1 class="text-2xl font-black text-slate-800">Profile Image</h1>
+                        <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Step 04 / 04</p>
+                    </div>
+                    <div class="flex justify-center mb-4">
+                        <div class="profile-upload-area" onclick="document.getElementById('setup-avatar-input').click()">
+                            <img id="setup-avatar-preview" src="" class="hidden">
+                            <div id="upload-icon" class="text-slate-400 text-center">
+                                <i class="fas fa-user-shield text-3xl mb-2"></i>
+                                <p class="text-[10px] font-black uppercase">Upload Photo</p>
+                            </div>
+                        </div>
+                        <input type="file" id="setup-avatar-input" class="hidden" accept="image/*" required>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="nextStep(2)" class="bg-slate-100 text-slate-500 py-4 rounded-xl font-black uppercase text-xs tracking-widest active:scale-95">Back</button>
+                        <button id="btn-register" class="bg-blue-600 text-white py-4 rounded-xl font-black uppercase text-xs tracking-widest shadow-lg active:scale-95">Complete Setup</button>
+                    </div>
+                </div>
             </div>
 
             <div id="login-form" class="hidden space-y-4">
@@ -213,7 +242,6 @@
             
             <div class="flex items-center space-x-3">
                 <span class="md:hidden text-xs font-black rainbow-text">Bye-Study</span>
-                
                 <div id="top-avatar-container" class="w-9 h-9 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center font-bold text-sm border border-blue-100 shadow-sm cursor-pointer overflow-hidden" onclick="switchTab('settings')">
                     👤
                 </div>
@@ -362,12 +390,53 @@
         const db = getFirestore(app);
         const APP_ID = 'bye-study-ultimate-v1'; 
 
-        let currentUser = null, userData = {}, marks = [], notes = [], plans = [], mainChart = null, subjectChart = null, profileBase64 = null, activePlanToCheck = null;
+        let currentUser = null, userData = {}, marks = [], notes = [], plans = [], mainChart = null, subjectChart = null, profileBase64 = null, activePlanToCheck = null, generatedOTP = null;
 
         const notify = (msg) => {
             document.getElementById('notif-message').innerText = msg;
             document.getElementById('notification-toast').classList.add('show');
             setTimeout(() => document.getElementById('notification-toast').classList.remove('show'), 3000);
+        };
+
+        // Navigation logic for steps
+        window.nextStep = (step) => {
+            const steps = ['1', '2', '3', 'otp'];
+            steps.forEach(s => document.getElementById(`setup-step-${s}`)?.classList.add('hidden'));
+
+            if (step === 2) {
+                const name = document.getElementById('reg-name').value;
+                const dist = document.getElementById('reg-district').value;
+                const school = document.getElementById('reg-school').value;
+                if(!name || !dist || !school) return (notify("All fields in Step 1 are mandatory!"), document.getElementById('setup-step-1').classList.remove('hidden'));
+            }
+            
+            const target = document.getElementById(`setup-step-${step}`);
+            if(target) target.classList.remove('hidden');
+        };
+
+        // OTP Generation & Simulation Logic
+        window.initOTP = () => {
+            const phone = document.getElementById('reg-phone').value;
+            const pass = document.getElementById('reg-pass').value;
+            
+            if(!phone || phone.length < 10) return notify("Enter a valid phone number!");
+            if(!pass || pass.length < 4) return notify("Enter a 4-digit PIN!");
+
+            generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
+            alert("BYE-STUDY VERIFICATION\nYour Security Code: " + generatedOTP); 
+            
+            window.nextStep('otp');
+            notify("OTP sent to " + phone);
+        };
+
+        window.verifyOTP = () => {
+            const input = document.getElementById('reg-otp-input').value;
+            if(input === generatedOTP) {
+                notify("Identity Verified!");
+                window.nextStep(3);
+            } else {
+                notify("Invalid Code! Please try again.");
+            }
         };
 
         const sanitize = (str) => {
@@ -408,7 +477,6 @@
             } catch (e) { console.error(e); }
         };
 
-        // Profile Avatar Selection logic
         document.getElementById('setup-avatar-input').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file && file.size < 800000) { 
@@ -481,7 +549,6 @@
             });
         };
 
-        // Full Registration Logic with Profile Picture
         document.getElementById('btn-register').onclick = async () => {
             const name = document.getElementById('reg-name').value, 
                   phone = document.getElementById('reg-phone').value, 
@@ -489,7 +556,7 @@
                   dist = document.getElementById('reg-district').value, 
                   pass = document.getElementById('reg-pass').value;
 
-            if (!name || !phone || !school || !dist || !pass) return notify("All fields mandatory!");
+            if (!name || !phone || !school || !dist || !pass || !profileBase64) return notify("All fields including Photo are mandatory!");
 
             userData = { 
                 name, 
@@ -497,7 +564,7 @@
                 school, 
                 district: dist, 
                 password: pass, 
-                profilePic: profileBase64 || null 
+                profilePic: profileBase64 
             };
 
             try {
@@ -510,7 +577,6 @@
             }
         };
 
-        // Settings Profile Pic Update logic
         document.getElementById('profile-file-input').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file && file.size < 800000) {
