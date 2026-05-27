@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
     <title> Bye-Study </title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
@@ -37,10 +39,10 @@
         #nav-settings.sidebar-active { background-color: var(--clr-prof); }
 
         #mob-dashboard.mobile-active { color: #ef4444 !important; }
-        #mob-analytics.mobile-active { color: #22c55e !important; }
-        #mob-planner.mobile-active   { color: #eab308 !important; }
-        #mob-notes.mobile-active     { color: #3b82f6 !important; }
-        #mob-settings.mobile-active  { color: #f97316 !important; }
+        #mob-analytics.mobile-active { color: #f97316 !important; }
+        #mob-planner.mobile-active   { color: #8b5cf6 !important; }
+        #mob-notes.mobile-active     { color: #eab308 !important; }
+        #mob-settings.mobile-active  { color: #3b82f6 !important; }
 
         .mobile-nav-btn { transition: color 0.3s ease; }
 
@@ -88,10 +90,47 @@
         .badge-excellent { background: #dcfce7; color: #166534; }
         .badge-average { background: #fef9c3; color: #854d0e; }
         .badge-needs-work { background: #fee2e2; color: #991b1b; }
+
+        /* Knowledge Growth Tree Styles */
+        .tree-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            height: 220px;
+            position: relative;
+            margin-top: 15px;
+        }
+        .tree-trunk {
+            width: 18px;
+            background: #5d4037;
+            border-radius: 5px;
+            transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .tree-leaves {
+            background: #86efac; /* Soft light green tree leafage */
+            border-radius: 50%;
+            position: relative;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 25px rgba(134, 239, 172, 0.4);
+        }
+        .fruit {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ef4444;
+            border-radius: 50%;
+            animation: fruit-pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes fruit-pop {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
     </style>
 </head>
 <body class="h-screen flex flex-col md:flex-row overflow-hidden">
 
+    <!-- Plan Completion Verification Modal -->
     <div id="plan-check-modal" class="modal-backdrop">
         <div class="modal-content">
             <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-6">🎯</div>
@@ -104,6 +143,21 @@
         </div>
     </div>
 
+    <!-- Custom Note Input Modal -->
+    <div id="note-modal" class="modal-backdrop">
+        <div class="modal-content">
+            <div class="w-16 h-16 bg-yellow-100 text-yellow-600 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-6">📝</div>
+            <h2 class="text-xl font-black text-slate-900 mb-2">New Protected Note</h2>
+            <p class="text-xs text-slate-400 mb-4">Write details of your study plan or thoughts safely.</p>
+            <textarea id="note-text-input" placeholder="Type your notes here..." class="w-full h-32 p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none font-bold text-sm mb-4 resize-none"></textarea>
+            <div class="grid grid-cols-2 gap-4">
+                <button id="btn-save-note-confirm" class="bg-yellow-500 text-white py-4 rounded-xl font-black text-[10px] uppercase shadow-lg active:scale-95">Save Note</button>
+                <button onclick="document.getElementById('note-modal').style.display='none'" class="bg-slate-100 text-slate-500 py-4 rounded-xl font-black text-[10px] uppercase active:scale-95">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Notification Toast -->
     <div id="notification-toast" class="bg-white border-2 border-slate-200 p-4 rounded-2xl shadow-2xl flex items-center space-x-4">
         <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shrink-0">
             <i class="fas fa-shield-alt"></i>
@@ -111,6 +165,7 @@
         <p id="notif-message" class="text-xs font-black text-slate-800 leading-tight">Secure Access Granted</p>
     </div>
 
+    <!-- Authentication Overlay (Seamless Handshake Flow) -->
     <div id="auth-overlay" class="fixed inset-0 z-[1000] bg-slate-50 flex items-center justify-center p-6 overflow-y-auto">
         <div class="w-full max-w-md bg-white p-8 md:p-10 rounded-[2.5rem] shadow-2xl border border-slate-100 my-auto">
             <div class="flex justify-center mb-6">
@@ -122,7 +177,9 @@
                 <p class="mt-4 text-[10px] font-bold uppercase text-slate-400 tracking-widest text-center">Encrypting Session...</p>
             </div>
 
+            <!-- Setup Form -->
             <div id="setup-form" class="hidden space-y-6">
+                <!-- Step 1 -->
                 <div id="setup-step-1" class="space-y-4">
                     <div class="text-center mb-4">
                         <h1 class="text-2xl font-black text-slate-800">Identify Yourself</h1>
@@ -143,6 +200,7 @@
                     <button onclick="nextStep(2)" class="w-full bg-slate-900 text-white py-4 rounded-xl font-black uppercase text-xs tracking-widest shadow-lg active:scale-95">Next Step</button>
                 </div>
 
+                <!-- Step 2 -->
                 <div id="setup-step-2" class="hidden space-y-4">
                     <div class="text-center mb-4">
                         <h1 class="text-2xl font-black text-slate-800">Secure Access</h1>
@@ -156,12 +214,14 @@
                     </div>
                 </div>
 
+                <!-- OTP Verification Step -->
                 <div id="setup-step-otp" class="hidden space-y-4">
                     <div class="text-center mb-4">
                         <h1 class="text-2xl font-black text-slate-800">Verify OTP</h1>
                         <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Verification Step</p>
                     </div>
                     <p class="text-[10px] text-center text-slate-500">Enter the 6-digit code sent via simulation.</p>
+                    <p id="otp-hint" class="text-[9px] text-center font-black text-blue-500 uppercase tracking-tighter opacity-50"></p>
                     <input type="text" id="reg-otp-input" placeholder="000000" maxlength="6" class="w-full p-4 bg-blue-50 border-blue-200 border rounded-xl font-black text-center text-xl tracking-[0.3em] outline-none">
                     <div class="grid grid-cols-2 gap-3">
                         <button onclick="nextStep(2)" class="bg-slate-100 text-slate-500 py-4 rounded-xl font-black uppercase text-xs tracking-widest active:scale-95">Back</button>
@@ -169,6 +229,7 @@
                     </div>
                 </div>
 
+                <!-- Step 3 (Profile Picture) -->
                 <div id="setup-step-3" class="hidden space-y-4">
                     <div class="text-center mb-4">
                         <h1 class="text-2xl font-black text-slate-800">Profile Image</h1>
@@ -191,6 +252,7 @@
                 </div>
             </div>
 
+            <!-- Lock Screen Login Form -->
             <div id="login-form" class="hidden space-y-4">
                 <div class="text-center">
                     <h1 class="text-2xl font-black text-slate-800">Secure Vault</h1>
@@ -204,6 +266,7 @@
         </div>
     </div>
 
+    <!-- Sidebar Navigation -->
     <aside id="sidebar" class="hidden md:flex w-64 bg-white border-r border-slate-200 flex-col shrink-0">
         <div class="p-8 text-center">
             <span class="text-xl font-black rainbow-text">Bye-Study</span>
@@ -236,6 +299,7 @@
         </div>
     </aside>
 
+    <!-- App Main Container -->
     <main id="app-container" class="flex-1 flex flex-col relative overflow-hidden hidden">
         <header class="h-16 md:h-20 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0">
             <h2 id="view-title" class="text-sm md:text-lg font-black uppercase tracking-tight text-slate-900 flex-1">Dashboard</h2>
@@ -249,18 +313,29 @@
         </header>
 
         <div class="flex-1 overflow-y-auto p-4 md:p-8 no-scrollbar pb-24 md:pb-8" id="view-container">
+            <!-- View Dashboard -->
             <div id="view-dashboard" class="space-y-6">
                 <div class="bg-gradient-to-br from-slate-900 to-blue-950 p-6 md:p-10 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
                     <div class="relative z-10 max-w-2xl">
                         <h3 class="text-xl md:text-2xl font-black mb-4">අධ්‍යාපනයේ වටිනාකම</h3>
                         <p class="text-xs md:text-sm font-medium leading-relaxed opacity-90 text-justify">
-                            අධ්‍යාපනය යනු හුදෙක් දැනුම ලබා ගැනීම පමණක් නොව, පුද්ගලයෙකුගේ චින්තනය සහ පෞරුෂය හැඩගස්වන ප්‍රබලතම මෙවලමයි. එය ලෝකය දෙස විචාරශීලීව බැලීමටත්, අභියෝග හමුවේ නොසැලී සිටීමටත් අවශ්‍ය ශක්තිය ලබා දෙයි. නිවැරදි අධ්‍යාපනයක් තුළින් ලබන විනය සහ අවබෝධය, පුද්ගල සාර්ථකත්වයට මෙන්ම රටක සංවර්ධනයට ද මුල්ගලක් වේ. දැනුම යනු කිසිවෙකුට සොරාගත නොහැකි, ජීවිත කාලය පුරා ඔබ සතු වන වටිනාම සම්පතයි.Bye-Study වැනි මෙවලම් හරහා, අප බලාපොරොත්තු වන්නේ ඉගෙනීම වඩාත් සංවිධානාත්මක සහ කාර්යක්ෂම කරමින් මෙම ගමන පහසු කිරීමයි.
+                            අධ්‍යාපනය යනු හුදෙක් දැනුම ලබා ගැනීම පමණක් නොව, පුද්ගලයෙකුගේ චින්තනය සහ පෞරුෂය හැඩගස්වන ප්‍රබලතම මෙවලමයි. එය ලෝකය දෙස විචාරශීලීව බැලීමටත්, අභියෝග හමුවේ නොසැලී සිටීමටත් අවශ්‍ය ශක්තිය ලබා දෙයි. නිවැරදි අධ්‍යාපනයක් තුළින් ලබන විනය සහ අවබෝධය, පුද්ගල සාර්ථකත්වයට මෙන්ම රටක සංවර්ධනයට ද මුල්ගලක් වේ. දැනුම යනු කිසිවෙකුට සොරාගත නොහැකි, ජීවිත කාලය පුරා ඔබ සතු වන වටිනාම සම්පතයි.
                         </p>
                     </div>
                 </div>
 
+                <div class="grid grid-cols-1 gap-4 mb-2">
+                    <div class="bg-white p-6 rounded-[2rem] border-2 border-yellow-400 shadow-sm flex justify-between items-center">
+                        <div>
+                            <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Total Earned Points</p>
+                            <h2 id="total-points-display" class="text-4xl font-black text-slate-800">0</h2>
+                        </div>
+                        <div class="w-16 h-16 bg-yellow-100 rounded-2xl flex items-center justify-center text-3xl">🏆</div>
+                    </div>
+                </div>
+
                 <div class="space-y-3">
-                    <p class="text-[9px] font-black uppercase tracking-widest text-slate-400">Security Check: All Systems Active</p>
+                    <p class="text-[9px] font-black uppercase tracking-widest text-slate-400">Subject Performance Summary</p>
                     <div id="subject-performance-row" class="flex space-x-4 overflow-x-auto no-scrollbar pb-2"></div>
                 </div>
 
@@ -269,13 +344,14 @@
                     <div class="flex flex-col md:flex-row gap-3">
                         <input type="text" id="input-subject" placeholder="Subject" class="flex-1 p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold text-sm uppercase">
                         <input type="number" id="input-score" placeholder="Score %" class="w-full md:w-32 p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold text-sm">
-                        <button id="btn-save-mark" class="bg-slate-900 text-white px-8 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest">Store Mark</button>
+                        <button id="btn-save-mark" class="bg-slate-900 text-white px-8 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-slate-800 transition-colors">Store Mark</button>
                     </div>
                 </div>
 
                 <div id="marks-grid" class="grid grid-cols-2 lg:grid-cols-4 gap-4"></div>
             </div>
 
+            <!-- View Analytics -->
             <div id="view-analytics" class="hidden space-y-8">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm flex flex-col items-center justify-center text-center">
@@ -288,31 +364,39 @@
                             <span id="anal-overall-percent" class="absolute text-3xl font-black text-slate-800">0%</span>
                         </div>
                     </div>
-                    <div class="md:col-span-2 bg-white p-6 rounded-[2.5rem] border border-slate-200 shadow-sm h-[350px]">
-                        <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-4">All Subject Performance (0-100%)</p>
-                        <canvas id="performanceChart"></canvas>
+
+                    <div class="md:col-span-2 bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm h-[350px]">
+                        <div class="flex justify-between items-center mb-4">
+                            <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Subject Progress Chart</p>
+                            <select id="anal-subject-select" onchange="updateSubjectChart()" class="p-2 bg-slate-50 border border-slate-200 rounded-lg font-black text-[9px] uppercase outline-none">
+                                <option value="">Choose Subject</option>
+                            </select>
+                        </div>
+                        <div class="relative h-64">
+                            <canvas id="subjectLineChart"></canvas>
+                        </div>
                     </div>
                 </div>
-                <div class="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-6">
-                    <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                        <div>
-                            <h3 class="text-lg font-black text-slate-800">Subject-Specific Analysis</h3>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Select a subject to track improvement</p>
-                        </div>
-                        <select id="anal-subject-select" class="p-3 bg-slate-50 border border-slate-200 rounded-xl font-black text-[10px] uppercase outline-none min-w-[200px]">
-                            <option value="">Choose Subject</option>
-                        </select>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-[2rem] border border-slate-200">
+                        <h4 class="text-[10px] font-black uppercase text-slate-400 mb-4">Score Distribution (Bar)</h4>
+                        <div class="h-64"><canvas id="barChart"></canvas></div>
                     </div>
-                    <div id="subject-detail-container" class="hidden">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div class="md:col-span-2 h-[300px]">
-                                <canvas id="subjectLineChart"></canvas>
+                    
+                    <div class="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm text-center flex flex-col justify-center">
+                        <h4 class="text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">Knowledge Growth Tree</h4>
+                        <p class="text-[9px] font-bold text-green-600 uppercase mb-4">ලකුණු වැඩිවත්ම ගස ලා කොළ පැහැයෙන් සරුසාර වේ</p>
+                        
+                        <div class="tree-container">
+                            <div id="tree-leaves" class="tree-leaves flex items-center justify-center">
+                                <div id="fruit-container" class="relative w-full h-full"></div>
                             </div>
-                            <div class="flex flex-col items-center justify-center p-6 bg-slate-50 rounded-[2rem] text-center">
-                                <div id="subject-badge" class="px-6 py-3 rounded-2xl font-black text-xs uppercase mb-4 tracking-widest">Analyze Data</div>
-                                <h4 id="subject-latest-score" class="text-3xl font-black text-slate-800">0%</h4>
-                                <p id="subject-summary-text" class="text-[9px] font-bold text-slate-600 italic mt-4">Select subject to view results</p>
-                            </div>
+                            <div id="tree-trunk" class="tree-trunk"></div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <span id="tree-status" class="text-xs font-black uppercase text-slate-700">බීජයක් අවධියේ (Seedling)</span>
                         </div>
                     </div>
                 </div>
@@ -336,180 +420,296 @@
                 <div id="notes-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
             </div>
 
+            <!-- View Notes -->
+            <div id="view-notes" class="hidden space-y-6">
+                <button onclick="addNote()" class="w-full py-4 bg-yellow-500 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-md hover:bg-yellow-600 transition-colors">+ Protected Note</button>
+                <div id="notes-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+            </div>
+
+            <!-- View Settings -->
             <div id="view-settings" class="hidden max-w-md mx-auto space-y-6 pb-12">
                 <div class="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm text-center">
-                    <div class="relative w-24 h-24 mx-auto mb-4 cursor-pointer group" onclick="document.getElementById('profile-file-input').click()">
+                    <div class="relative w-24 h-24 mx-auto mb-4 cursor-pointer" onclick="document.getElementById('profile-file-input').click()">
                         <div id="profile-avatar-display" class="w-full h-full bg-slate-100 rounded-[2rem] flex items-center justify-center text-4xl overflow-hidden border">👤</div>
-                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 rounded-[2rem] flex items-center justify-center text-white text-xs font-black transition-all">IDENTIFY</div>
                         <input type="file" id="profile-file-input" class="hidden" accept="image/*">
                     </div>
                     <h3 id="set-name-title" class="text-xl font-black text-slate-800">Verified User</h3>
-                    <p id="set-school-display" class="text-[10px] font-bold text-slate-400 uppercase mb-2">School</p>
-                    <p id="set-district-display" class="text-[9px] font-black text-slate-500 uppercase mb-2 tracking-widest"></p>
-                    <p id="set-phone-display" class="text-[10px] font-black text-blue-600 mb-8 tracking-widest"></p>
-                    <button id="btn-logout" class="w-full py-4 text-red-500 font-black uppercase text-[10px] tracking-widest border border-red-50 rounded-xl hover:bg-red-50">Secure Sign Out</button>
+                    <p id="set-school-display" class="text-[10px] font-bold text-slate-400 uppercase">School</p>
+                    <p id="set-district-display" class="text-[9px] font-black text-slate-500 uppercase tracking-widest"></p>
+                    <p id="set-phone-display" class="text-[10px] font-black text-blue-600 mb-8"></p>
+                    <button id="btn-logout" class="w-full py-4 text-red-500 font-black uppercase text-[10px] border border-red-50 rounded-xl hover:bg-red-50 transition-colors">Secure Sign Out</button>
                 </div>
             </div>
         </div>
 
+        <!-- Mobile Navigation Footer -->
         <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex items-center justify-around h-16 z-50 px-2">
             <button onclick="switchTab('dashboard')" id="mob-dashboard" class="mobile-nav-btn flex flex-col items-center w-full text-slate-400">
-                <i class="fas fa-th-large"></i><span class="text-[7px] font-black uppercase mt-1">Home</span>
+                <i class="fas fa-th-large text-base"></i><span class="text-[7px] font-black uppercase mt-1">Home</span>
             </button>
             <button onclick="switchTab('analytics')" id="mob-analytics" class="mobile-nav-btn flex flex-col items-center w-full text-slate-400">
-                <i class="fas fa-chart-line"></i><span class="text-[7px] font-black uppercase mt-1">Stats</span>
+                <i class="fas fa-chart-line text-base"></i><span class="text-[7px] font-black uppercase mt-1">Stats</span>
             </button>
             <button onclick="switchTab('planner')" id="mob-planner" class="mobile-nav-btn flex flex-col items-center w-full text-slate-400">
-                <i class="fas fa-calendar-alt"></i><span class="text-[7px] font-black uppercase mt-1">Plan</span>
+                <i class="fas fa-calendar-alt text-base"></i><span class="text-[7px] font-black uppercase mt-1">Plan</span>
             </button>
             <button onclick="switchTab('notes')" id="mob-notes" class="mobile-nav-btn flex flex-col items-center w-full text-slate-400">
-                <i class="fas fa-sticky-note"></i><span class="text-[7px] font-black uppercase mt-1">Notes</span>
+                <i class="fas fa-sticky-note text-base"></i><span class="text-[7px] font-black uppercase mt-1">Notes</span>
             </button>
             <button onclick="switchTab('settings')" id="mob-settings" class="mobile-nav-btn flex flex-col items-center w-full text-slate-400">
-                <i class="fas fa-cog"></i><span class="text-[7px] font-black uppercase mt-1">Set</span>
+                <i class="fas fa-cog text-base"></i><span class="text-[7px] font-black uppercase mt-1">Set</span>
             </button>
         </nav>
     </main>
 
+    <!-- App Module Scripts -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, addDoc, deleteDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, addDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyANauA3o8fRpcHkbrrFk6Nq9UrcYTBs6MQ",
-            authDomain: "bye-app-ed194.firebaseapp.com",
-            projectId: "bye-app-ed194",
-            storageBucket: "bye-app-ed194.firebasestorage.app",
-            messagingSenderId: "126852516020",
-            appId: "1:126852516020:web:8ed8dd5f3b6811ddbaefe1"
-        };
+        // Environment Firebase Setup & Fallback Config
+        const firebaseConfig = typeof __firebase_config !== 'undefined' 
+            ? JSON.parse(__firebase_config) 
+            : {
+                apiKey: "AIzaSyANauA3o8fRpcHkbrrFk6Nq9UrcYTBs6MQ",
+                authDomain: "bye-app-ed194.firebaseapp.com",
+                projectId: "bye-app-ed194",
+                storageBucket: "bye-app-ed194.firebasestorage.app",
+                messagingSenderId: "126852516020",
+                appId: "1:126852516020:web:8ed8dd5f3b6811ddbaefe1"
+            };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const APP_ID = 'bye-study-ultimate-v1'; 
+        const APP_ID = typeof __app_id !== 'undefined' ? __app_id : 'bye-study-ultimate-v1'; 
 
-        let currentUser = null, userData = {}, marks = [], notes = [], plans = [], mainChart = null, subjectChart = null, profileBase64 = null, activePlanToCheck = null, generatedOTP = null;
+        let currentUser = null, userData = {}, marks = [], notes = [], plans = [];
+        let subjectChart = null, generatedOTP = null;
+        let charts = { line: null, bar: null };
+        let unsubscribes = [];
 
         const notify = (msg) => {
+           
+       if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js')
+            .then(reg => console.log('Service Worker Registered!'))
+            .catch(err => console.log('Service Worker registration failed:', err));
+    });
+}
+
+if ('Notification' in window) {
+    Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+            console.log('Notification permission granted.');
+        }
+    });
+}
             document.getElementById('notif-message').innerText = msg;
             document.getElementById('notification-toast').classList.add('show');
             setTimeout(() => document.getElementById('notification-toast').classList.remove('show'), 3000);
         };
+      
+       // ප්ලෑනර් ටයිමර් පරීක්ෂාව
+setInterval(() => {
+    const now = new Date();
+    const currentTime = now.getHours().toString().padStart(2, '0') + ":" + 
+                        now.getMinutes().toString().padStart(2, '0');
 
-        // Navigation logic for steps
+    plans.forEach(plan => {
+        if (plan.end === currentTime && !plan.completed) {
+            if (Notification.permission === "granted") {
+                new Notification("Bye Study Pro", {
+                    body: "කාලය අවසන්! " + plan.task + " සම්පූර්ණ කළාද?",
+                });
+            }
+        }
+    });
+}, 30000); 
+
+        // Live Tree Progress Engine
+        const updateStudyTree = (average) => {
+            const trunk = document.getElementById('tree-trunk');
+            const leaves = document.getElementById('tree-leaves');
+            const fruitContainer = document.getElementById('fruit-container');
+            const statusText = document.getElementById('tree-status');
+
+            if (!trunk || !leaves || !fruitContainer || !statusText) return;
+
+            // Trunk scale based on overall average
+            const trunkHeight = Math.max(25, Math.min(150, average * 1.5)); 
+            trunk.style.height = `${trunkHeight}px`;
+
+            // Leaf canopy scale based on overall average
+            const leavesSize = 60 + (average * 0.8);
+            leaves.style.width = `${leavesSize}px`;
+            leaves.style.height = `${leavesSize}px`;
+
+            // Harvest fruit count based on milestone thresholds
+            fruitContainer.innerHTML = '';
+            let fruitCount = 0;
+            if (average >= 35) fruitCount = 1;
+            if (average >= 50) fruitCount = 2;
+            if (average >= 75) fruitCount = 3;
+            if (average >= 90) fruitCount = 4;
+
+            for (let i = 0; i < fruitCount; i++) {
+                const fruit = document.createElement('div');
+                fruit.className = 'fruit';
+                fruit.style.top = (15 + Math.random() * 65) + '%';
+                fruit.style.left = (15 + Math.random() * 65) + '%';
+                fruitContainer.appendChild(fruit);
+            }
+
+            // Milestone Label Updates
+            if (average < 40) {
+                statusText.innerText = "බීජයක් අවධියේ (Seedling) 🌱";
+            } else if (average < 75) {
+                statusText.innerText = "ශක්තිමත් ගසක් (Growing Tree) 🌳";
+            } else {
+                statusText.innerText = "ඵල දරන විශාල ගසක්! (Fruitful Tree) 🍎";
+            }
+        };
+
+        const getSubjectColor = (subject) => {
+            const sub = subject.toUpperCase().trim();
+            const specialColors = {'ICT': '#ef4444', 'COMBINED MATHS': '#1d4ed8', 'PHYSICS': '#7c3aed', 'CHEMISTRY': '#059669'};
+            if (specialColors[sub]) return specialColors[sub];
+            let hash = 0;
+            for (let i = 0; i < sub.length; i++) hash = sub.charCodeAt(i) + ((hash << 5) - hash);
+            return `hsl(${Math.abs(hash % 360)}, 70%, 45%)`; 
+        };
+
         window.nextStep = (step) => {
             const steps = ['1', '2', '3', 'otp'];
-            steps.forEach(s => document.getElementById(`setup-step-${s}`)?.classList.add('hidden'));
-
+            steps.forEach(s => {
+                const el = document.getElementById(`setup-step-${s}`);
+                if(el) el.classList.add('hidden');
+            });
             if (step === 2) {
                 const name = document.getElementById('reg-name').value;
-                const dist = document.getElementById('reg-district').value;
-                const school = document.getElementById('reg-school').value;
-                if(!name || !dist || !school) return (notify("All fields in Step 1 are mandatory!"), document.getElementById('setup-step-1').classList.remove('hidden'));
+                if(!name) return (notify("Name is required!"), document.getElementById('setup-step-1').classList.remove('hidden'));
             }
-            
-            const target = document.getElementById(`setup-step-${step}`);
-            if(target) target.classList.remove('hidden');
+            document.getElementById(`setup-step-${step}`)?.classList.remove('hidden');
         };
 
-        // OTP Generation & Simulation Logic
-        window.initOTP = () => {
-            const phone = document.getElementById('reg-phone').value;
-            const pass = document.getElementById('reg-pass').value;
-            
-            if(!phone || phone.length < 10) return notify("Enter a valid phone number!");
-            if(!pass || pass.length < 4) return notify("Enter a 4-digit PIN!");
-
-            generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
-            alert("BYE-STUDY VERIFICATION\nYour Security Code: " + generatedOTP); 
-            
-            window.nextStep('otp');
-            notify("OTP sent to " + phone);
-        };
-
-        window.verifyOTP = () => {
-            const input = document.getElementById('reg-otp-input').value;
-            if(input === generatedOTP) {
-                notify("Identity Verified!");
-                window.nextStep(3);
-            } else {
-                notify("Invalid Code! Please try again.");
-            }
-        };
-
-        const sanitize = (str) => {
-            const div = document.createElement('div');
-            div.textContent = str;
-            return div.innerHTML;
-        };
-
-        const startPlanChecker = () => {
-            setInterval(() => {
-                const now = new Date();
-                const currentStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-                plans.forEach(plan => {
-                    if (plan.endTime === currentStr && !plan.checked) {
-                        showPlanCheckModal(plan);
-                    }
-                });
-            }, 20000); 
-        };
-
-        const showPlanCheckModal = (plan) => {
-            if (activePlanToCheck) return;
-            activePlanToCheck = plan;
-            document.getElementById('check-task-name').innerText = plan.task;
-            document.getElementById('plan-check-modal').style.display = 'flex';
-        };
-
-        window.submitPlanResult = async (isSuccess) => {
-            if (!activePlanToCheck || !currentUser) return;
-            try {
-                await updateDoc(doc(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'plans', activePlanToCheck.id), {
-                    checked: true,
-                    status: isSuccess ? 'SUCCESS' : 'FAILED'
-                });
-                document.getElementById('plan-check-modal').style.display = 'none';
-                notify(isSuccess ? "Session completed.niyamayi machan!" : "Session missed.try your next plan smartly");
-                activePlanToCheck = null;
-            } catch (e) { console.error(e); }
-        };
-
-        document.getElementById('setup-avatar-input').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file && file.size < 800000) { 
+        // Profile Picture Upload Handler
+        const handleImageUpload = (input, previewId, iconId) => {
+            const file = input.files[0];
+            if (file) {
+                if (file.size > 1024 * 1024) {
+                    notify("Image too large! Max 1MB");
+                    return;
+                }
                 const reader = new FileReader();
-                reader.onload = e => {
-                    profileBase64 = e.target.result;
-                    document.getElementById('setup-avatar-preview').src = profileBase64;
-                    document.getElementById('setup-avatar-preview').classList.remove('hidden');
-                    document.getElementById('upload-icon').classList.add('hidden');
+                reader.onload = (e) => {
+                    const base64 = e.target.result;
+                    const preview = document.getElementById(previewId);
+                    const icon = document.getElementById(iconId);
+                    
+                    if (preview) {
+                        preview.src = base64;
+                        preview.classList.remove('hidden');
+                    }
+                    if (icon) icon.classList.add('hidden');
+                    
+                    if (previewId === 'setup-avatar-preview') {
+                        userData.avatar = base64;
+                    } else {
+                        updateProfileImage(base64);
+                    }
                 };
                 reader.readAsDataURL(file);
-            } else notify("Image too large (Max 800KB)");
-        });
+            }
+        };
 
+        const updateProfileImage = async (base64) => {
+            if (!currentUser) return;
+            try {
+                const userRef = doc(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'profile', 'data');
+                await setDoc(userRef, { ...userData, avatar: base64 }, { merge: true });
+                userData.avatar = base64;
+                updateProfileUI();
+                notify("Profile photo updated!");
+            } catch (e) {
+                console.error(e);
+            }
+        };
+
+        document.getElementById('setup-avatar-input').onchange = (e) => handleImageUpload(e.target, 'setup-avatar-preview', 'upload-icon');
+        document.getElementById('profile-file-input').onchange = (e) => handleImageUpload(e.target, 'profile-avatar-display', null);
+
+        window.initOTP = () => { 
+            generatedOTP = Math.floor(100000 + Math.random() * 900000).toString(); 
+            notify("SECURITY: Simulated OTP is " + generatedOTP); 
+            const hint = document.getElementById('otp-hint');
+            if(hint) hint.innerText = "(Simulated OTP: " + generatedOTP + ")";
+            window.nextStep('otp'); 
+        };
+        
+        window.verifyOTP = () => { 
+            if (document.getElementById('reg-otp-input').value === generatedOTP) window.nextStep(3); 
+            else notify("Invalid OTP"); 
+        };
+
+        // Secure Authentication Handshake & Init
+        const initAuth = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                console.error("Auth Handshake failed, defaulting to Anonymous Login: ", err);
+                await signInAnonymously(auth);
+            }
+        };
+           // Notification 
+if ("Notification" in window) {
+    Notification.requestPermission();
+}
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
-                const snap = await getDoc(doc(db, 'artifacts', APP_ID, 'users', user.uid, 'profile', 'data'));
-                document.getElementById('loading-spinner').classList.add('hidden');
-                
-                if (snap.exists()) {
-                    userData = snap.data();
-                    const isAccessGranted = localStorage.getItem('bye_study_auth_session') === 'true';
-                    if (isAccessGranted) enterApp();
-                    else {
-                        document.getElementById('login-form').classList.remove('hidden');
-                        document.getElementById('login-phone-display').innerText = `Verified: ${userData.phone.substring(0,3)}****`;
+                unsubscribes.forEach(unsub => unsub());
+                unsubscribes = [];
+
+                try {
+                    const snap = await getDoc(doc(db, 'artifacts', APP_ID, 'users', user.uid, 'profile', 'data'));
+                    const spinner = document.getElementById('loading-spinner');
+                    if (spinner) spinner.classList.add('hidden');
+
+                    if (snap.exists()) {
+                        userData = snap.data();
+                        if (localStorage.getItem('bye_study_session') === 'true') {
+                            enterApp();
+                        } else {
+                            document.getElementById('setup-form').classList.add('hidden');
+                            document.getElementById('login-form').classList.remove('hidden');
+                            document.getElementById('login-phone-display').innerText = userData.phone || "";
+                        }
+                    } else {
+                        document.getElementById('login-form').classList.add('hidden');
+                        document.getElementById('setup-form').classList.remove('hidden');
+                        window.nextStep(1);
                     }
-                } else document.getElementById('setup-form').classList.remove('hidden');
-                syncData();
-                startPlanChecker(); 
-            } else await signInAnonymously(auth);
+                    syncData();
+                } catch (e) {
+                    console.error("Profile sync failure: ", e);
+                    notify("Database connection secure, awaiting profiles...");
+                }
+            } else {
+                currentUser = null;
+                const spinner = document.getElementById('loading-spinner');
+                if (spinner) spinner.classList.remove('hidden');
+            }
         });
+
+        // Trigger init immediately on startup
+        initAuth();
 
         const enterApp = () => {
             document.getElementById('auth-overlay').classList.add('hidden');
@@ -518,198 +718,344 @@
             switchTab('dashboard');
         };
 
-        const updateProfileUI = () => {
-            document.getElementById('set-name-title').innerText = sanitize(userData.name);
-            document.getElementById('side-username').innerText = sanitize(userData.name);
-            document.getElementById('set-school-display').innerText = sanitize(userData.school);
-            document.getElementById('set-district-display').innerText = sanitize(userData.district);
-            document.getElementById('set-phone-display').innerText = `VERIFIED: ${userData.phone}`;
-            
-            const imgHtml = userData.profilePic ? `<img src="${userData.profilePic}" class="w-full h-full object-cover">` : `👤`;
-            document.getElementById('side-avatar-container').innerHTML = imgHtml;
-            document.getElementById('top-avatar-container').innerHTML = imgHtml;
-            document.getElementById('profile-avatar-display').innerHTML = imgHtml;
-        };
-
-        const syncData = () => {
-            const up = ['artifacts', APP_ID, 'users', currentUser.uid];
-            onSnapshot(collection(db, ...up, 'marks'), s => { 
-                marks = s.docs.map(d => ({id: d.id, ...d.data()})).sort((a,b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0)); 
-                renderMarks(); 
-                renderPerformanceOverview();
-                updateSubjectDropdown();
-            });
-            onSnapshot(collection(db, ...up, 'notes'), s => { 
-                notes = s.docs.map(d => ({id: d.id, ...d.data()})); 
-                renderNotes(); 
-            });
-            onSnapshot(collection(db, ...up, 'plans'), s => { 
-                plans = s.docs.map(d => ({id: d.id, ...d.data()})); 
-                renderPlans(); 
-            });
-        };
-
+        // Finish Profile Setup
         document.getElementById('btn-register').onclick = async () => {
-            const name = document.getElementById('reg-name').value, 
-                  phone = document.getElementById('reg-phone').value, 
-                  school = document.getElementById('reg-school').value, 
-                  dist = document.getElementById('reg-district').value, 
-                  pass = document.getElementById('reg-pass').value;
+            const name = document.getElementById('reg-name').value;
+            const district = document.getElementById('reg-district').value;
+            const school = document.getElementById('reg-school').value;
+            const phone = document.getElementById('reg-phone').value;
+            const pin = document.getElementById('reg-pass').value;
 
-            if (!name || !phone || !school || !dist || !pass || !profileBase64) return notify("All fields including Photo are mandatory!");
+            if (!userData.avatar) {
+                notify("Please upload a profile photo!");
+                return;
+            }
 
-            userData = { 
-                name, 
-                phone, 
-                school, 
-                district: dist, 
-                password: pass, 
-                profilePic: profileBase64 
+            const profileData = {
+                name, district, school, phone, pin,
+                avatar: userData.avatar,
+                createdAt: serverTimestamp()
             };
 
             try {
-                await setDoc(doc(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'profile', 'data'), userData);
-                localStorage.setItem('bye_study_auth_session', 'true'); 
+                await setDoc(doc(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'profile', 'data'), profileData);
+                userData = profileData;
+                localStorage.setItem('bye_study_session', 'true');
                 enterApp();
-                notify("Account created successfully!");
-            } catch (err) {
-                notify("Error saving data");
+            } catch (e) {
+                notify("Error saving profile");
             }
         };
-
-        document.getElementById('profile-file-input').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file && file.size < 800000) {
-                const reader = new FileReader();
-                reader.onload = async (e) => {
-                    const newPic = e.target.result;
-                    try {
-                        await updateDoc(doc(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'profile', 'data'), {
-                            profilePic: newPic
-                        });
-                        userData.profilePic = newPic;
-                        updateProfileUI();
-                        notify("Profile picture updated!");
-                    } catch (err) {
-                        notify("Error updating picture");
-                    }
-                };
-                reader.readAsDataURL(file);
-            } else {
-                notify("Image too large (Max 800KB)");
-            }
-        });
 
         document.getElementById('btn-login').onclick = () => {
-            if (document.getElementById('login-pass').value === userData.password) {
-                localStorage.setItem('bye_study_auth_session', 'true'); 
+            if (document.getElementById('login-pass').value === userData.pin) {
+                localStorage.setItem('bye_study_session', 'true');
                 enterApp();
-            } else notify("Access Denied: Invalid PIN");
-        };
-
-        window.switchTab = (id) => {
-            const views = ['dashboard', 'analytics', 'notes', 'planner', 'settings'];
-            views.forEach(v => {
-                document.getElementById(`view-${v}`)?.classList.add('hidden');
-                document.getElementById(`nav-${v}`)?.classList.remove('sidebar-active');
-                
-                const mobBtn = document.getElementById(`mob-${v}`);
-                if(mobBtn) {
-                    mobBtn.classList.remove('mobile-active');
-                    mobBtn.classList.add('text-slate-400');
-                }
-            });
-
-            document.getElementById(`view-${id}`)?.classList.remove('hidden');
-            document.getElementById(`nav-${id}`)?.classList.add('sidebar-active');
-
-            const activeMobBtn = document.getElementById(`mob-${id}`);
-            if(activeMobBtn) {
-                activeMobBtn.classList.remove('text-slate-400');
-                activeMobBtn.classList.add('mobile-active');
+            } else {
+                notify("Wrong PIN");
             }
-
-            document.getElementById('view-title').innerText = id.toUpperCase();
-            if (id === 'analytics') setTimeout(renderCharts, 100);
         };
 
-        document.getElementById('btn-save-mark').onclick = async () => {
-            const sub = document.getElementById('input-subject').value.toUpperCase().trim(), 
-                  sc = parseInt(document.getElementById('input-score').value);
-            if (!sub || isNaN(sc)) return notify("Invalid Data");
-            await addDoc(collection(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'marks'), { subject: sub, score: sc, timestamp: serverTimestamp() });
-            document.getElementById('input-subject').value = ''; document.getElementById('input-score').value = '';
+        const updateProfileUI = () => {
+            document.getElementById('side-username').innerText = userData.name || "Student";
+            document.getElementById('set-name-title').innerText = userData.name || "Student";
+            document.getElementById('set-school-display').innerText = userData.school || "Your School";
+            document.getElementById('set-district-display').innerText = userData.district || "Your District";
+            document.getElementById('set-phone-display').innerText = userData.phone || "";
+            
+            const avatarHtml = userData.avatar ? `<img src="${userData.avatar}" class="w-full h-full object-cover">` : '👤';
+            document.getElementById('side-avatar-container').innerHTML = avatarHtml;
+            document.getElementById('top-avatar-container').innerHTML = avatarHtml;
+            document.getElementById('profile-avatar-display').innerHTML = avatarHtml;
+        };
+
+        // Real-time Firestore Listeners with Custom Error Handling
+        const syncData = () => {
+            if (!currentUser) return;
+            const base = ['artifacts', APP_ID, 'users', currentUser.uid];
+            
+            const u1 = onSnapshot(collection(db, ...base, 'marks'), s => { 
+                marks = s.docs.map(d => d.data());
+                renderMarks();
+                renderPerformanceOverview();
+                updateSubjectDropdown();
+            }, err => console.error("Marks synchronizer error:", err));
+
+            const u2 = onSnapshot(collection(db, ...base, 'notes'), s => {
+                notes = s.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderNotes();
+            }, err => console.error("Notes synchronizer error:", err));
+
+            const u3 = onSnapshot(collection(db, ...base, 'plans'), s => {
+                plans = s.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderPlans();
+            }, err => console.error("Planner synchronizer error:", err));
+
+            unsubscribes.push(u1, u2, u3);
         };
 
         const renderMarks = () => {
-            const displayMarks = [...marks].reverse();
-            document.getElementById('marks-grid').innerHTML = displayMarks.map(m => `
-                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm relative group">
-                    <button onclick="window.delData('marks','${m.id}')" class="absolute top-2 right-2 text-slate-200 hover:text-red-500 opacity-0 group-hover:opacity-100"><i class="fas fa-times"></i></button>
-                    <p class="text-[8px] font-black uppercase text-slate-400 mb-1">${sanitize(m.subject)}</p>
-                    <h4 class="text-xl font-black text-slate-800">${m.score}%</h4>
+            document.getElementById('marks-grid').innerHTML = marks.map(m => `
+                <div class="bg-white p-4 rounded-2xl border-l-8" style="border-color: ${getSubjectColor(m.subject)}">
+                    <p class="text-[8px] font-black uppercase mb-1" style="color: ${getSubjectColor(m.subject)}">${m.subject}</p>
+                    <h4 class="text-xl font-black">${m.score}%</h4>
                 </div>`).join('');
         };
 
         const renderPerformanceOverview = () => {
-            const summary = {};
-            marks.forEach(m => { 
-                if(!summary[m.subject]) summary[m.subject] = { t: 0, c: 0 }; 
-                summary[m.subject].t += m.score; summary[m.subject].c++; 
+            let sum = 0, pts = 0;
+            const subSum = {};
+            marks.forEach(m => {
+                sum += m.score;
+                pts += Math.floor(m.score/10);
+                if(!subSum[m.subject]) subSum[m.subject] = {s:0, c:0};
+                subSum[m.subject].s += m.score; subSum[m.subject].c++;
             });
-            document.getElementById('subject-performance-row').innerHTML = Object.entries(summary).map(([s, d]) => `
-                <div class="bg-white p-5 rounded-[2rem] border border-slate-200 shadow-sm min-w-[130px] text-center">
-                    <p class="text-[8px] font-black uppercase text-slate-400 mb-1">${sanitize(s)}</p>
-                    <span class="text-xl font-black text-slate-800">${Math.round(d.t/d.c)}%</span>
+
+            const avg = marks.length ? Math.round(sum/marks.length) : 0;
+            document.getElementById('total-points-display').innerText = pts;
+            document.getElementById('anal-overall-percent').innerText = `${avg}%`;
+            
+            updateStudyTree(avg);
+
+            const circ = document.getElementById('anal-overall-circle');
+            if (circ) circ.style.strokeDashoffset = 439.8 - (avg/100)*439.8;
+            
+            document.getElementById('subject-performance-row').innerHTML = Object.entries(subSum).map(([n, d]) => `
+                <div class="bg-white p-4 rounded-2xl min-w-[120px] text-center border">
+                    <p class="text-[8px] font-black text-slate-400">${n}</p>
+                    <p class="text-lg font-black">${Math.round(d.s/d.c)}%</p>
                 </div>`).join('');
         };
 
         const updateSubjectDropdown = () => {
-            const subjects = [...new Set(marks.map(m => m.subject))];
+            const subjects = [...new Set(marks.map(m => m.subject.toUpperCase()))];
             const select = document.getElementById('anal-subject-select');
+            if(!select) return;
             const currentVal = select.value;
             select.innerHTML = '<option value="">Choose Subject</option>' + 
                 subjects.map(s => `<option value="${s}">${s}</option>`).join('');
-            if (subjects.includes(currentVal)) select.value = currentVal;
+            select.value = currentVal;
+            if(currentVal) updateSubjectChart();
         };
 
-        const renderCharts = () => {
-            const stats = {};
-            marks.forEach(m => {
-                if(!stats[m.subject]) stats[m.subject] = { t:0, c:0 };
-                stats[m.subject].t += m.score; stats[m.subject].c++;
-            });
-            const labels = Object.keys(stats);
-            const data = labels.map(l => Math.round(stats[l].t / stats[l].c));
-            const avg = data.length ? Math.round(data.reduce((a,b)=>a+b,0)/data.length) : 0;
+        window.updateSubjectChart = () => {
+            const selectedSub = document.getElementById('anal-subject-select').value;
+            const canvas = document.getElementById('subjectLineChart');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
             
-            document.getElementById('anal-overall-percent').innerText = avg + '%';
-            document.getElementById('anal-overall-circle').style.strokeDashoffset = 439.8 - (avg/100)*439.8;
-            
-            const ctxBar = document.getElementById('performanceChart').getContext('2d');
-            if (mainChart) mainChart.destroy();
-            mainChart = new Chart(ctxBar, {
-                type: 'bar',
-                data: { labels, datasets: [{ label: 'Avg Score %', data, backgroundColor: '#f97316', borderRadius: 8 }] },
+            if (subjectChart) subjectChart.destroy();
+            if (charts.bar) charts.bar.destroy();
+
+            if (!selectedSub) return;
+
+            const filteredData = marks.filter(m => m.subject.toUpperCase() === selectedSub);
+            const labels = filteredData.map((_, i) => `Ex ${i+1}`);
+            const scores = filteredData.map(m => m.score);
+            const themeColor = getSubjectColor(selectedSub);
+
+            subjectChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Score %',
+                        data: scores,
+                        borderColor: themeColor,
+                        backgroundColor: themeColor + '20',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 6,
+                        pointBackgroundColor: themeColor
+                    }]
+                },
                 options: { 
-                    responsive: true, maintainAspectRatio: false,
-                    scales: { y: { beginAtZero: true, max: 100 }, x: { ticks: { font: { weight: 'bold' } } } },
-                    plugins: { legend: { display: false } } 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { min: 0, max: 100 } }
                 }
             });
+
+            const barCtx = document.getElementById('barChart').getContext('2d');
+            charts.bar = new Chart(barCtx, {
+                type: 'bar',
+                data: { 
+                    labels, 
+                    datasets: [{ 
+                        data: scores, 
+                        backgroundColor: themeColor, 
+                        borderRadius: 8 
+                    }] 
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
         };
 
-        document.getElementById('anal-subject-select').onchange = function() {
-            const selected = this.value;
-            if (!selected) {
-                document.getElementById('subject-detail-container').classList.add('hidden');
-                return;
+        // Note Management (Custom modal driven to avoid prompt() thread blocks)
+        window.addNote = () => {
+            document.getElementById('note-text-input').value = '';
+            document.getElementById('note-modal').style.display = 'flex';
+        };
+
+        document.getElementById('btn-save-note-confirm').onclick = async () => {
+            const content = document.getElementById('note-text-input').value.trim();
+            if (content) {
+                try {
+                    await addDoc(collection(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'notes'), {
+                        content,
+                        timestamp: serverTimestamp()
+                    });
+                    document.getElementById('note-modal').style.display = 'none';
+                    notify("Note Saved!");
+                } catch (e) {
+                    console.error(e);
+                    notify("Failed to save note.");
+                }
+            } else {
+                notify("Note cannot be empty!");
             }
-            document.getElementById('subject-detail-container').classList.remove('hidden');
-            renderSpecificSubjectLine(selected);
         };
 
-        const renderSpecificSubjectLine = (subjectName) => {
+        const renderNotes = () => {
+            document.getElementById('notes-grid').innerHTML = notes.map(n => `
+                <div class="bg-yellow-50 p-6 rounded-3xl border-2 border-yellow-100 shadow-sm relative group">
+                    <button onclick="window.deleteItem('notes', '${n.id}')" class="absolute top-4 right-4 text-yellow-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <p class="text-sm font-bold text-yellow-900 leading-relaxed break-words">${n.content}</p>
+                </div>
+            `).join('');
+        };
+
+        // Plan Task Creation & Verification Management
+        document.getElementById('btn-save-plan').onclick = async () => {
+            const task = document.getElementById('plan-task').value;
+            const start = document.getElementById('plan-start').value;
+            const end = document.getElementById('plan-end').value;
+            if (task && start && end) {
+                await addDoc(collection(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'plans'), {
+                    task, start, end, completed: false, timestamp: serverTimestamp()
+                });
+                document.getElementById('plan-task').value = '';
+                document.getElementById('plan-start').value = '';
+                document.getElementById('plan-end').value = '';
+                notify("Task Planned!");
+            }
+        };
+
+        const renderPlans = () => {
+            document.getElementById('plans-grid').innerHTML = plans.map(p => `
+                <div class="bg-white p-6 rounded-[2rem] border border-slate-200 flex justify-between items-center relative overflow-hidden group">
+                    <div class="flex-1 min-w-0 pr-4">
+                        <h4 class="font-black text-slate-800 truncate ${p.completed ? 'line-through text-slate-400' : ''}">${p.task}</h4>
+                        <p class="text-[10px] font-black text-purple-500 uppercase">${p.start} - ${p.end}</p>
+                        ${p.completed ? '<span class="inline-block mt-1 text-[8px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-black">COMPLETED</span>' : ''}
+                    </div>
+                    <div class="flex items-center space-x-2 shrink-0">
+                        ${!p.completed ? `
+                        <button onclick="window.triggerPlanCheck('${p.id}', '${p.task}')" class="w-9 h-9 bg-green-50 hover:bg-green-100 text-green-600 rounded-xl flex items-center justify-center transition-colors">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        ` : ''}
+                        <button onclick="window.deleteItem('plans', '${p.id}')" class="w-9 h-9 bg-slate-50 hover:bg-red-50 text-slate-300 hover:text-red-500 rounded-xl flex items-center justify-center transition-colors">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        };
+
+        let activeCheckPlanId = null;
+        window.triggerPlanCheck = (id, name) => {
+            activeCheckPlanId = id;
+            document.getElementById('check-task-name').innerText = name;
+            document.getElementById('plan-check-modal').style.display = 'flex';
+        };
+
+        window.submitPlanResult = async (isCompleted) => {
+            if (!activeCheckPlanId) return;
+            try {
+                if (isCompleted) {
+                    const planRef = doc(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'plans', activeCheckPlanId);
+                    await setDoc(planRef, { completed: true }, { merge: true });
+                    notify("Niyamayi Machan 🎯");
+                } else {
+                    notify("Kammaliyo Gammen Wadakaranna 💪");
+                }
+            } catch (err) {
+                console.error(err);
+            }
+            document.getElementById('plan-check-modal').style.display = 'none';
+            activeCheckPlanId = null;
+        };
+
+        window.deleteItem = async (col, id) => {
+            await deleteDoc(doc(db, 'artifacts', APP_ID, 'users', currentUser.uid, col, id));
+            notify("Item Removed");
+        };
+
+        document.getElementById('btn-logout').onclick = () => {
+            localStorage.removeItem('bye_study_session');
+            window.location.reload();
+        };
+
+        window.switchTab = (id) => {
+            const views = ['dashboard', 'analytics', 'planner', 'notes', 'settings'];
+            views.forEach(v => {
+                const el = document.getElementById(`view-${v}`);
+                if(el) el.classList.add('hidden');
+                
+                // Update Desktop Sidebar Navs
+                const nav = document.getElementById(`nav-${v}`);
+                if(nav) nav.classList.remove('sidebar-active');
+
+                // Update Mobile Navs
+                const mob = document.getElementById(`mob-${v}`);
+                if(mob) mob.classList.remove('mobile-active');
+            });
+
+            document.getElementById(`view-${id}`).classList.remove('hidden');
+            document.getElementById(`nav-${id}`)?.classList.add('sidebar-active');
+            document.getElementById(`mob-${id}`)?.classList.add('mobile-active');
+            
+            // Format nice title
+            document.getElementById('view-title').innerText = id.charAt(0).toUpperCase() + id.slice(1);
+
+            if(id === 'analytics') {
+                setTimeout(() => {
+                    updateSubjectDropdown();
+                }, 100);
+            }
+        };
+        
+        document.getElementById('btn-save-mark').onclick = async () => {
+            const subInput = document.getElementById('input-subject');
+            const scoreInput = document.getElementById('input-score');
+            const sub = subInput.value.trim();
+            const sc = parseInt(scoreInput.value);
+            
+            if(sub && !isNaN(sc)) {
+                if (sc < 0 || sc > 100) {
+                    notify("Score must be between 0 and 100");
+                    return;
+                }
+                await addDoc(collection(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'marks'), { 
+                    subject: sub, 
+                    score: sc, 
+                    timestamp: serverTimestamp() 
+                });
+                subInput.value = '';
+                scoreInput.value = '';
+                notify("Mark Stored!");
+            } else {
+                notify("Please check subject and score inputs!");
+            }
+        };
+         
+         
+          const renderSpecificSubjectLine = (subjectName) => {
             const subjectData = marks.filter(m => m.subject === subjectName);
             const scores = subjectData.map(m => m.score);
             const dates = subjectData.map((m, idx) => `Entry ${idx + 1}`);
@@ -733,70 +1079,9 @@
                 badge.className = "px-6 py-3 rounded-2xl font-black text-xs uppercase mb-4 tracking-widest badge-needs-work";
                 summary.innerText = "YOU'RE WEAK STUDENT.PLEASE WORK WITH SMART.TRY NOW.";
             }
-
-            const ctxLine = document.getElementById('subjectLineChart').getContext('2d');
-            if (subjectChart) subjectChart.destroy();
-            subjectChart = new Chart(ctxLine, {
-                type: 'line',
-                data: {
-                    labels: dates,
-                    datasets: [{
-                        label: 'Progression',
-                        data: scores,
-                        borderColor: '#8b5cf6',
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    scales: { y: { beginAtZero: true, max: 100 } },
-                    plugins: { legend: { display: false } }
-                }
-            });
-        };
-
-        window.addNote = async () => { 
-            await addDoc(collection(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'notes'), { title: 'New Note', content: '', timestamp: serverTimestamp() }); 
-        };
-        const renderNotes = () => { 
-            document.getElementById('notes-grid').innerHTML = notes.map(n => `
-                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-3">
-                    <input type="text" onchange="window.un('${n.id}','title',this.value)" value="${sanitize(n.title)}" class="w-full font-black text-[10px] uppercase outline-none">
-                    <textarea onchange="window.un('${n.id}','content',this.value)" class="w-full h-24 text-[10px] outline-none resize-none">${sanitize(n.content)}</textarea>
-                    <button onclick="window.delData('notes','${n.id}')" class="text-[8px] font-black text-red-300">Wipe Data</button>
-                </div>`).join(''); 
-        };
-        window.un = async (id, f, v) => { await updateDoc(doc(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'notes', id), { [f]: v }); };
-        window.delData = async (col, id) => { 
-            if(confirm("Confirm deletion?")) await deleteDoc(doc(db, 'artifacts', APP_ID, 'users', currentUser.uid, col, id)); 
-        };
-        document.getElementById('btn-logout').onclick = () => { localStorage.removeItem('bye_study_auth_session'); location.reload(); };
-
-        document.getElementById('btn-save-plan').onclick = async () => {
-            const task = document.getElementById('plan-task').value, s = document.getElementById('plan-start').value, e = document.getElementById('plan-end').value;
-            if (!task || !s || !e) return notify("Security: Task incomplete");
-            await addDoc(collection(db, 'artifacts', APP_ID, 'users', currentUser.uid, 'plans'), { 
-                task, startTime: s, endTime: e, checked: false, status: 'PENDING' 
-            });
-            document.getElementById('plan-task').value = '';
-        };
-
-        const renderPlans = () => {
-            document.getElementById('plans-grid').innerHTML = plans.map(p => {
-                const statusColor = p.status === 'SUCCESS' ? 'text-green-500' : (p.status === 'FAILED' ? 'text-red-500' : 'text-purple-600');
-                return `
-                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden">
-                    <button onclick="window.delData('plans','${p.id}')" class="absolute top-4 right-4 text-slate-200 hover:text-red-500"><i class="fas fa-trash"></i></button>
-                    <p class="text-[9px] font-black uppercase ${statusColor}">${p.status || 'PENDING'}</p>
-                    <h4 class="text-sm font-black text-slate-800 mb-4">${sanitize(p.task)}</h4>
-                    <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl">
-                        <span class="text-[10px] font-black text-slate-700">${p.startTime} - ${p.endTime}</span>
-                    </div>
-                    ${p.status === 'SUCCESS' ? '<div class="absolute bottom-0 left-0 w-full h-1 bg-green-500"></div>' : ''}
-                </div>`;
-            }).join('');
-        };
+          };
+          
+            
     </script>
 </body>
 </html>
