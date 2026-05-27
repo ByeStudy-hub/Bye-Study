@@ -1,0 +1,8 @@
+self.addEventListener('push', function(event) {
+    const options = {
+        body: 'Oyata mathak karanna deyak thiyenawa!',
+        icon: 'icon.png',
+        badge: 'icon.png'
+    };
+    event.waitUntil(self.registration.showNotification('Bye-Study Pro', options));
+});
